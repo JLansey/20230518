@@ -75,16 +75,19 @@ int main(void)
 			}
 
 			Horn_Enable(0);
-			LED_Green(1);
+			// LED_Green(0);
 
 			//LED_update();//////////////
-			if(!(CHARGER_STATUS_PORT.IN & CHARGER_STATUS_BIT))
-			{
-				LED_Red(1);
-			}
-			else
+			if(CHARGER_STATUS_PORT.IN & CHARGER_STATUS_BIT) // battery is fully charged
 			{
 				LED_Red(0);
+			    LED_Green(1);
+
+			}
+			else // battery is charging
+			{
+				LED_Red(1);
+				LED_Green(0);
 			}
 		}
 
