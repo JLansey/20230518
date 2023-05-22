@@ -68,11 +68,11 @@ void LED_Green(uint8_t Enable)
 {
 	if(Enable)
 	{
-		LED_RED_PORT.OUTSET = LED_GREEN_BIT;
+		LED_GREEN_PORT.OUTSET = LED_GREEN_BIT;
 	}
 	else
 	{
-		LED_RED_PORT.OUTCLR = LED_GREEN_BIT;
+		LED_GREEN_PORT.OUTCLR = LED_GREEN_BIT;
 	}
 }
 
