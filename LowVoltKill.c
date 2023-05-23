@@ -52,7 +52,7 @@ void LowVoltKill_init(void)
 	//Setup DAC
 	DAC0.CTRLA = DAC_OUTEN_bm | DAC_ENABLE_bm;
 	VREF.CTRLA = VREF_DAC0REFSEL_1V1_gc | VREF_ADC0REFSEL_1V1_gc;
-	DAC0.DATA = LOW_VOLT_KILL_DAC_CNT;
+	DAC0.DATA = LOW_VOLT_KILL_DAC_CNT; // dac on one side, battery on the other
    
 	//Setup AC
 	AC0.MUXCTRLA = AC_MUXPOS_PIN0_gc | AC_MUXNEG_DAC_gc | (0 << AC_INVERT_bp);
@@ -96,7 +96,7 @@ void LowVoltKill_update(void)
 			//if battery already low without honking horn.  Just shut down with Red LED on
 			case LOW_VOLT_STATE_KILL:
 			{
-				if(!(AC0.STATUS & AC_STATE_bm))
+				if(!(AC0.STATUS & AC_STATE_bm)) // AC0.STATUS - the analog comparitor to compare voltages
 				{
 					LowVoltState = LOW_VOLT_STATE_DEAD;
 				}
