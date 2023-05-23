@@ -27,13 +27,13 @@
 
 FUSES = {
 	.WDTCFG = PERIOD_2KCLK_gc | WINDOW_OFF_gc,
-	.BODCFG = ACTIVE_ENABLED_gc | LVL_BODLEVEL7_gc,
+	.BODCFG = ACTIVE_ENABLED_gc | LVL_BODLEVEL7_gc, // brownout detect voltage
 	//.OSCCFG = FREQSEL_20MHZ_gc,
 	.OSCCFG = FREQSEL_16MHZ_gc,
 	.reserved_1 = {0xFF},
 	.TCD0CFG = 0x00,
 	.SYSCFG0 = CRCSRC_NOCRC_gc | RSTPINCFG_UPDI_gc,
-	.SYSCFG1 = SUT_64MS_gc,
+	.SYSCFG1 = SUT_4MS_gc, // startup time for the processer, how long do you wait
 	.APPEND = 0x00,
 	.BOOTEND = BOOTEND_FUSE
 };
