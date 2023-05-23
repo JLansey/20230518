@@ -34,7 +34,7 @@ void SwitchInit(void)
 
 	//Initialize variables used for Horn Switch
 	SwitchOldTick = 0;
-	SwitchHornDebounce = 0;
+	SwitchHornDebounce = SWITCH_HORN_DEBOUNCE_INITIAL; // 29
 	SwitchHornStatus = 0;
 }
 
