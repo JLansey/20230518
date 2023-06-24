@@ -15,8 +15,8 @@
 #define LOW_VOLT_LOW_BATT_DAC_CNT			0x2f
 #define LOW_VOLT_KILL_TIMEOUT				10
 #define LOW_VOLT_LOW_BATT_DET_TIME			100
-#define LOW_VOLT_TIME_WAIT_LOW_BATT_BEEP	1000
-#define LOW_VOLT_LOW_BATT_BEEP				250
+#define LOW_VOLT_TIME_WAIT_LOW_BATT_BEEP	100 // time delay from honk
+#define LOW_VOLT_LOW_BATT_BEEP				100 // length of time it is honking for
 #define LOW_VOLT_TIME_MAX_HORN_ON_TIME		10000
 
 
