@@ -10,6 +10,8 @@
 
 #include <avr/io.h>
 #include "Horn.h"
+#include <util/delay.h>
+
 
 //*--------------------------------------------------------------------------------------
 //* Function Name       : Horn_init()
@@ -37,6 +39,16 @@ void Horn_Enable(uint8_t Enable)
 	if(Enable)
 	{
 		HORN_PORT.OUTSET = HORN_BIT;
+		
+		for(int i = 0; i < 1; i++) {
+			_delay_ms(1);
+		}
+		
+		HORN_PORT.OUTCLR = HORN_BIT;
+		
+		for(int i = 0; i < 5; i++) {
+			_delay_ms(1);
+		}
 	}
 	else
 	{

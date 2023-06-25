@@ -63,6 +63,7 @@ int main(void)
 	{
 		wdt_reset();
 		SwitchUpdate();
+		
 
 		//If Charging: LED's are controlled by Charger, and horn is forced off
 		if(!(CHARGER_PWR_GOOD_PORT.IN & CHARGER_PWR_GOOD_BIT))
@@ -92,7 +93,7 @@ int main(void)
 		}
 
 		else
-		//Not charging, hong horn unless fault found
+		//Not charging, honk horn unless fault found
 		{
 			if(LowSpeed == 1)
 			{

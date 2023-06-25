@@ -11,6 +11,8 @@
 #include <avr/io.h>
 #include "Timer.h"
 #include "Switch.h"
+#include <util/delay.h>
+
 
 //global variables
 uint16_t SwitchOldTick;
@@ -48,6 +50,7 @@ void SwitchInit(void)
 
 void SwitchUpdate(void)
 {
+
 	//check if time to scan switches
 	if(RTC_getTick() != SwitchOldTick)
 	{
