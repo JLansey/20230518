@@ -12,6 +12,8 @@
 #include "Timer.h"
 #include "Switch.h"
 #include <util/delay.h>
+#include "Horn.h"
+
 
 
 //global variables
@@ -83,6 +85,7 @@ void SwitchUpdate(void)
 			{
 				SwitchHornDebounce = 0;
 				SwitchHornStatus = 0;					//clear bit indicating horn switch no longer pressed
+				Horn_Bell();
 			}
 		}
 	}

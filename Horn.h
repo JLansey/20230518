@@ -15,4 +15,5 @@
 
 //Prototypes
 void Horn_init(void);
+void Horn_Bell(void);
 void Horn_Enable(uint8_t Enable);
