@@ -34,3 +34,4 @@
 //Prototypes
 void LowVoltKill_init(void);
 void LowVoltKill_update(void);
+void BellUpdateRing(void);

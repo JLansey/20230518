@@ -53,7 +53,7 @@ int main(void)
 	Charger_init();
 	Horn_init();
 	LowVoltKill_init();
-	
+		
 	LowSpeed = 0;
 	
 	// Enable interrupts
@@ -63,6 +63,7 @@ int main(void)
 	{
 		wdt_reset();
 		SwitchUpdate();
+		BellUpdateSwitch();
 
 		//If Charging: LED's are controlled by Charger, and horn is forced off
 		if(!(CHARGER_PWR_GOOD_PORT.IN & CHARGER_PWR_GOOD_BIT))
@@ -104,6 +105,10 @@ int main(void)
 			//LED_update();///////////////////
 			LED_Green(0);
 			LowVoltKill_update();
+			BellUpdateRing();
+			
+			
+			
 		}
 	}
 }

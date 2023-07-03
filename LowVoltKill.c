@@ -194,3 +194,21 @@ void LowVoltKill_update(void)
 		}
 	}
 }
+
+
+void BellUpdateRing()
+{
+	
+	// switch from on to off if we need to
+	if (BellCntOn == 0)
+	{
+		BellCntOff = BELL_T_OFF;
+		Horn_Enable(0);
+	}
+	if (BellCntOff == 0)
+	{
+		BellCntOn = BELL_T_ON;
+		Horn_Enable(1);
+	}
+
+}
