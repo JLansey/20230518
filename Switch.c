@@ -11,6 +11,7 @@
 #include <avr/io.h>
 #include "Timer.h"
 #include "Switch.h"
+#include "Led.h"
 
 //global variables
 uint16_t SwitchOldTick;
@@ -27,9 +28,6 @@ uint16_t SwitchBellCnt; // total count for the delay
 
 uint16_t BellCntOn;
 uint16_t BellCntOff;
-
-
-
 
 uint8_t SwitchBellStatus; // is it bell ringing time?
 
@@ -65,14 +63,9 @@ void BellInit(void)
 	//maybe don't need this function at all??
 	
 	//Initialize variables used for Bell Switch
-	SwitchBellCnt = 0;
-	
-//	BELL_T_ON = 100;
-	//BELL_T_OFF = 100;
-	
+	SwitchBellCnt = 0;	
 	BellCntOn = 0;
 	BellCntOff = 0;
-
 	SwitchBellStatus = 0;
 
 }
@@ -83,10 +76,9 @@ void BellInit(void)
 void TurnBellOn(void)
 {
 	SwitchBellCnt = SWITCH_BELL_DELAY;
-	SwitchHornStatus = 1;
+	SwitchBellStatus = 1;
+	BellCntOff = 0; // it will be on for one cycle then switch off
 	BellCntOn = BELL_T_ON;
-	BellCntOff = 0;
-//	Horn_Enable(1);
 			
 }
 //*--------------------------------------------------------------------------------------
@@ -96,7 +88,7 @@ void TurnBellOn(void)
 void TurnBellOff(void)
 {
 	SwitchBellCnt = 0;
-	SwitchHornStatus = 0;
+	SwitchBellStatus = 0;
 	BellCntOn = 0;
 }
 
@@ -202,15 +194,26 @@ void BellUpdateSwitch(void)
 	//drive the horn to make the bell sound
 		if (BellCntOn > 0)
 		{
-			//Horn_Enable(1);
-			
 			BellCntOn--;
-		}
+		}		
+		
 		
 		if (BellCntOff > 0)
 		{
-			//Horn_Enable(0);
 			BellCntOff--;			
+		}
+		
+		// flip the speaker from on to off
+		if(BellCntOn == 0)
+		{
+			blinker(2);
+			BellCntOff = BELL_T_OFF;
+		}
+		
+		if(BellCntOff == 0)
+		{
+			//blinker(3);
+			BellCntOn = BELL_T_ON;
 		}	
 		
 	}
@@ -243,6 +246,18 @@ void SwitchClearBellStatus(void)
 }
 
 
+uint8_t GetBellSpeakerStatus(void)
+{
+	if (BellCntOn > 0)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+	
+}
 
 
 

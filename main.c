@@ -52,6 +52,7 @@ int main(void)
 	SwitchInit();
 	Charger_init();
 	Horn_init();
+	BellInit();
 	LowVoltKill_init();
 		
 	LowSpeed = 0;
@@ -106,8 +107,6 @@ int main(void)
 			LED_Green(0);
 			LowVoltKill_update();
 			BellUpdateRing();
-			
-			
 			
 		}
 	}

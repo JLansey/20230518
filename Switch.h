@@ -22,9 +22,9 @@
 #define SWITCH_HORN_CTRL		PORTB.PIN1CTRL
 
 //Bell switch
-#define BELL_T_ON 100
-#define BELL_T_OFF 100
-#define SWITCH_BELL_DELAY 10000
+#define SWITCH_BELL_DELAY 40000
+#define BELL_T_ON 500
+#define BELL_T_OFF 500
 
 
 //Switch macros
@@ -43,6 +43,7 @@ void SwitchClearHornStatus(void);
 void BellUpdateSwitch(void);
 uint8_t SwitchBellGetStatus(void);
 void SwitchClearBellStatus(void);
+uint8_t GetBellSpeakerStatus(void);
 
 // Global Variables
 //extern uint16_t SwitchOldTick;
@@ -50,6 +51,6 @@ void SwitchClearBellStatus(void);
 //extern uint8_t SwitchHornStatus;
 //extern uint16_t SWITCH_BELL_DELAY;
 //extern uint16_t SwitchBellCnt;
-extern uint16_t BellCntOn;
-extern uint16_t BellCntOff;
+//extern uint16_t BellCntOn;
+//extern uint16_t BellCntOff;
 //extern uint8_t SwitchBellStatus;

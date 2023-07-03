@@ -31,6 +31,7 @@
 #define VOLT_KILL_ADC_BIT			(1 << VOLT_KILL_ADC_PIN)
 #define VOLT_KILL_ADC_CTRL			PORTA.PIN7CTRL
 
+
 //Prototypes
 void LowVoltKill_init(void);
 void LowVoltKill_update(void);
