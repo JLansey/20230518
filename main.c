@@ -92,7 +92,7 @@ int main(void)
 		}
 
 		else
-		//Not charging, hong horn unless fault found
+		//Not charging, honk horn unless fault found
 		{
 			if(LowSpeed == 1)
 			{
