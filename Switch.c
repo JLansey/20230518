@@ -240,8 +240,6 @@ void BellUpdateSwitch(void)
 			//blinker(3);
 			BellCntOn = BELL_T_ON;
 		}	
-		
-		}
 
 //regular turn entire bell process on or off
 		if(SwitchBellCnt > 0)
@@ -299,5 +297,3 @@ uint8_t GetBellSpeakerStatus(void)
 
 
 
-=======
-}
