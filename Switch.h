@@ -19,6 +19,12 @@
 #define SWITCH_HORN_BIT			(1 << SWITCH_HORN_PIN)
 #define SWITCH_HORN_CTRL		PORTB.PIN1CTRL
 
+//Bell switch
+#define SWITCH_BELL_DELAY 25000
+#define BELL_T_ON 1500
+#define BELL_T_OFF 500
+
+
 //Switch macros
 //#define	SwitchPowerPressed()	(!(SwitchInputs & SWITCH_POWER))
 //#define	SwitchUser1Pressed()	(!(SwitchInputs & SWITCH_USER1))
@@ -29,3 +35,9 @@ void SwitchInit (void);
 void SwitchUpdate(void);
 uint8_t SwitchHornGetStatus(void);
 void SwitchClearHornStatus(void);
+
+void BellUpdateSwitch(void);
+uint8_t SwitchBellGetStatus(void);
+void SwitchClearBellStatus(void);
+uint8_t GetBellSpeakerStatus(void);
+

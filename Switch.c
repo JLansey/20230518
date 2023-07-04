@@ -38,6 +38,47 @@ void SwitchInit(void)
 	SwitchHornStatus = 0;
 }
 
+//*--------------------------------------------------------------------------------------
+//* Function Name       : BellInit()
+//* Object              : Set up user switch input
+//* Input Parameters    : none
+//* Output Parameters   : none
+//*--------------------------------------------------------------------------------------
+
+void BellInit(void)
+{
+	//maybe don't need this function at all??
+	
+	//Initialize variables used for Bell Switch
+	SwitchBellCnt = 0;	
+	BellCntOn = 0;
+	BellCntOff = 0;
+	SwitchBellStatus = 0;
+
+}
+
+//*--------------------------------------------------------------------------------------
+//* Function Name       : TurnBellOn()
+//* Object              : Turn on the bell
+void TurnBellOn(void)
+{
+	SwitchBellStatus = 1;
+	SwitchBellCnt = SWITCH_BELL_DELAY;
+	BellCntOn = BELL_T_ON;
+	BellCntOff = 0; // it will be on for one cycle then switch off
+	//blinkerG(2);
+			
+}
+//*--------------------------------------------------------------------------------------
+//* Function Name       : TurnBellOff()
+//* Object              :Turn the bell off
+
+void TurnBellOff(void)
+{
+	SwitchBellCnt = 0;
+	SwitchBellStatus = 0;
+	BellCntOn = 0;
+}
 
 //*--------------------------------------------------------------------------------------
 //* Function Name       : SwitchUpdate()
@@ -67,6 +108,7 @@ void SwitchUpdate(void)
 			{
 				SwitchHornDebounce = 255;				//indicate switch pressed
 				SwitchHornStatus = 1;					//sets that a switch has been pressed
+				TurnBellOff();                   // turn off the bell
 			}
 		}
 		else
@@ -109,4 +151,107 @@ uint8_t SwitchHornGetStatus(void)
 void SwitchClearHornStatus(void)
 {
 	SwitchHornStatus = 0;
+}
+
+
+//*--------------------------------------------------------------------------------------
+//* Function Name       : BellUpdate()
+//* Object              : update switch function
+//* Input Parameters    : none
+//* Output Parameters   : none
+//*--------------------------------------------------------------------------------------
+
+void BellUpdateSwitch(void)
+{
+	//***********************************
+	// Bell
+	//***********************************
+	//is switch off AND also are we still ringing the bell?
+	if((!SwitchHornStatus) && SwitchBellStatus)
+	{
+
+
+		//drive the horn to make the bell sound
+		if (BellCntOn > 0)
+		{
+			BellCntOn--;
+		}
+
+		if (BellCntOn > 1000)
+		{
+			LED_Red(1);
+			LED_Red(0);
+
+		}
+
+		if (BellCntOff > 0)
+		{
+			BellCntOff--;
+		}
+
+		// flip the speaker from on to off
+		if(BellCntOn == 0)
+		{
+			BellCntOff = BELL_T_OFF;
+			blinker(2);
+		}
+
+		if(BellCntOff == 0)
+		{
+			//blinker(3);
+			BellCntOn = BELL_T_ON;
+		}
+
+//regular turn entire bell process on or off
+		if(SwitchBellCnt > 0)
+		{
+			SwitchBellCnt--;
+		}
+		if(SwitchBellCnt == 0)
+		{
+			TurnBellOff();
+			blinkerG(2);
+		}
+
+	}
+}
+
+
+//*--------------------------------------------------------------------------------------
+//* Function Name       : SwitchBellGetStatus()
+//* Object              : return the status of the horn switch
+//* Input Parameters    : none
+//* Output Parameters   : uint8_t = horn switch Status
+//*--------------------------------------------------------------------------------------
+
+uint8_t SwitchBellGetStatus(void)
+{
+	return SwitchBellStatus;
+}
+
+
+//*--------------------------------------------------------------------------------------
+//* Function Name       : SwitchClearBellStatus()
+//* Object              : clear bell bit
+//* Input Parameters    : none
+//* Output Parameters   : none
+//*--------------------------------------------------------------------------------------
+
+void SwitchClearBellStatus(void)
+{
+	SwitchBellStatus = 0;
+}
+
+
+uint8_t GetBellSpeakerStatus(void)
+{
+	if (BellCntOn > 0)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+	
 }
