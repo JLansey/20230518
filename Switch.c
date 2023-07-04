@@ -11,12 +11,25 @@
 #include <avr/io.h>
 #include "Timer.h"
 #include "Switch.h"
+#include "Led.h"
 
 //global variables
 uint16_t SwitchOldTick;
 uint8_t SwitchHornDebounce;
 uint8_t SwitchHornStatus;
 
+
+//Bell related
+//uint16_t SWITCH_BELL_DELAY;  // how long should the bell ring for?
+uint16_t SwitchBellCnt; // total count for the delay
+
+//uint16_t BELL_T_ON;
+//uint16_t BELL_T_OFF;
+
+uint16_t BellCntOn;
+uint16_t BellCntOff;
+
+uint8_t SwitchBellStatus; // is it bell ringing time?
 
 //*--------------------------------------------------------------------------------------
 //* Function Name       : SwitchInit()
@@ -62,7 +75,13 @@ void BellInit(void)
 //* Object              : Turn on the bell
 void TurnBellOn(void)
 {
+
+  SwitchBellCnt = SWITCH_BELL_DELAY;
 	SwitchBellStatus = 1;
+	BellCntOff = 0; // it will be on for one cycle then switch off
+	BellCntOn = BELL_T_ON;
+
+  SwitchBellStatus = 1;
 	SwitchBellCnt = SWITCH_BELL_DELAY;
 	BellCntOn = BELL_T_ON;
 	BellCntOff = 0; // it will be on for one cycle then switch off
@@ -122,6 +141,7 @@ void SwitchUpdate(void)
 			{
 				SwitchHornDebounce = 0;
 				SwitchHornStatus = 0;					//clear bit indicating horn switch no longer pressed
+				TurnBellOn();
 			}
 		}
 	}
@@ -170,6 +190,34 @@ void BellUpdateSwitch(void)
 	if((!SwitchHornStatus) && SwitchBellStatus)
 	{
 
+		if(SwitchBellCnt > 0)
+		{
+			SwitchBellCnt--;
+		}
+		if(SwitchBellCnt == 0)
+		{
+			TurnBellOff();
+		}
+
+	//drive the horn to make the bell sound
+		if (BellCntOn > 0)
+		{
+			BellCntOn--;
+		}		
+		
+		
+		if (BellCntOff > 0)
+		{
+			BellCntOff--;			
+		}
+		
+		// flip the speaker from on to off
+		if(BellCntOn == 0)
+		{
+			blinker(2);
+			BellCntOff = BELL_T_OFF;
+		}
+		
 
 		//drive the horn to make the bell sound
 		if (BellCntOn > 0)
@@ -200,6 +248,8 @@ void BellUpdateSwitch(void)
 		{
 			//blinker(3);
 			BellCntOn = BELL_T_ON;
+		}	
+		
 		}
 
 //regular turn entire bell process on or off
@@ -254,4 +304,9 @@ uint8_t GetBellSpeakerStatus(void)
 		return 0;
 	}
 	
+}
+
+
+
+=======
 }

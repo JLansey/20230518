@@ -12,6 +12,8 @@
 #define TIME_SWITCH_PRESS_DET	15	//Time in mS to detect Switch pressed
 #define TIME_SWITCH_RELEASE_DET 15	//Time in mS to detect Switch released
 #define SWITCH_HORN_DEBOUNCE_INITIAL 14 // Starting the debounce counter up closer
+		
+	
 	
 //Horn Switch
 #define SWITCH_HORN_PORT		PORTB
@@ -30,8 +32,11 @@
 //#define	SwitchUser1Pressed()	(!(SwitchInputs & SWITCH_USER1))
 //#define SwitchUser2Pressed()	(!(SwitchInputs & SWITCH_USER2))
 
-//Prototypes
-void SwitchInit (void);
+// Function Prototypes
+void SwitchInit(void);
+void BellInit(void);
+void TurnBellOn(void);
+void TurnBellOff(void);
 void SwitchUpdate(void);
 uint8_t SwitchHornGetStatus(void);
 void SwitchClearHornStatus(void);

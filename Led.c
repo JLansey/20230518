@@ -117,6 +117,7 @@ void blinker(uint8_t n)
 }
 
 
+
 //blink the green light
 void blinkerG(uint8_t n)
 {
@@ -128,3 +129,4 @@ void blinkerG(uint8_t n)
 	}
 	//	RTC_delayMS(500);
 }
+

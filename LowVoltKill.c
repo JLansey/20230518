@@ -194,3 +194,31 @@ void LowVoltKill_update(void)
 		}
 	}
 }
+
+
+void BellUpdateRing()
+{
+	
+	// switch from on to off if we need to
+	//Horn_Enable(GetBellSpeakerStatus());
+	//GetBellSpeakerStatus();
+	if(SwitchBellGetStatus())
+	{
+		LED_Green(1);
+		if (GetBellSpeakerStatus())
+		{
+			LED_Red(0);
+			Horn_Enable(1);
+		}
+		else
+		{
+			Horn_Enable(0);
+		}
+	}
+	else
+	{
+		LED_Green(0);
+	}
+	
+
+}
