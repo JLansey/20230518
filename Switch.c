@@ -190,15 +190,6 @@ void BellUpdateSwitch(void)
 	if((!SwitchHornStatus) && SwitchBellStatus)
 	{
 
-		if(SwitchBellCnt > 0)
-		{
-			SwitchBellCnt--;
-		}
-		if(SwitchBellCnt == 0)
-		{
-			TurnBellOff();
-		}
-
 	//drive the horn to make the bell sound
 		if (BellCntOn > 0)
 		{
