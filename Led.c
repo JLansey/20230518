@@ -105,7 +105,6 @@ void LED_update()
 }   
 
 
-
 void blinker(uint8_t n)
 {
 	for(uint8_t i = 0; i < n; i++) {
@@ -116,3 +115,18 @@ void blinker(uint8_t n)
 	}
 //	RTC_delayMS(500);
 }
+
+
+
+//blink the green light
+void blinkerG(uint8_t n)
+{
+	for(uint8_t i = 0; i < n; i++) {
+		LED_Green(1);
+		RTC_delayMS(50);
+		LED_Green(0);
+		RTC_delayMS(50);
+	}
+	//	RTC_delayMS(500);
+}
+
