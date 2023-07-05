@@ -79,6 +79,7 @@ void TurnBellOn(void)
 	SwitchBellCnt = SWITCH_BELL_DELAY;
 	BellCntOn = BELL_T_ON;
 	BellCntOff = 0; // it will be on for one cycle then switch off
+	LED_Green(1);
 	//blinkerG(2);
 			
 }
@@ -93,6 +94,7 @@ void TurnBellOff(void)
 
 	SwitchBellStatus = 0;
 	SwitchBellDingStatus = 0;
+	LED_Green(0);
 }
 
 //*--------------------------------------------------------------------------------------

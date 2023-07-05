@@ -104,7 +104,7 @@ int main(void)
 			}
 
 			//LED_update();///////////////////
-			LED_Green(0);
+			//LED_Green(0);
 			LowVoltKill_update();
 			BellUpdateRing();
 			
