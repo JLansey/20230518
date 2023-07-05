@@ -21,10 +21,10 @@
 #define SWITCH_HORN_BIT			(1 << SWITCH_HORN_PIN)
 #define SWITCH_HORN_CTRL		PORTB.PIN1CTRL
 
-//Bell switch
-#define SWITCH_BELL_DELAY 25000
-#define BELL_T_ON 1500
-#define BELL_T_OFF 500
+//Bell switch                ,
+#define SWITCH_BELL_DELAY 50000UL
+#define BELL_T_ON 15UL
+#define BELL_T_OFF 25UL
 
 
 //Switch macros

@@ -21,14 +21,12 @@ uint8_t SwitchHornStatus;
 
 //Bell related
 //uint16_t SWITCH_BELL_DELAY;  // how long should the bell ring for?
-uint16_t SwitchBellCnt; // total count for the delay
+uint32_t SwitchBellCnt; // total count for the delay
 
-//uint16_t BELL_T_ON;
-//uint16_t BELL_T_OFF;
+uint32_t BellCntOn;
+uint32_t BellCntOff;
 
-uint16_t BellCntOn;
-uint16_t BellCntOff;
-
+uint8_t SwitchBellDingStatus; // are we on or off
 uint8_t SwitchBellStatus; // is it bell ringing time?
 
 //*--------------------------------------------------------------------------------------
@@ -66,6 +64,7 @@ void BellInit(void)
 	SwitchBellCnt = 0;	
 	BellCntOn = 0;
 	BellCntOff = 0;
+	SwitchBellDingStatus = 0;
 	SwitchBellStatus = 0;
 
 }
@@ -75,13 +74,8 @@ void BellInit(void)
 //* Object              : Turn on the bell
 void TurnBellOn(void)
 {
-
-  SwitchBellCnt = SWITCH_BELL_DELAY;
 	SwitchBellStatus = 1;
-	BellCntOff = 0; // it will be on for one cycle then switch off
-	BellCntOn = BELL_T_ON;
-
-  SwitchBellStatus = 1;
+	SwitchBellDingStatus = 1;
 	SwitchBellCnt = SWITCH_BELL_DELAY;
 	BellCntOn = BELL_T_ON;
 	BellCntOff = 0; // it will be on for one cycle then switch off
@@ -95,8 +89,10 @@ void TurnBellOn(void)
 void TurnBellOff(void)
 {
 	SwitchBellCnt = 0;
-	SwitchBellStatus = 0;
 	BellCntOn = 0;
+
+	SwitchBellStatus = 0;
+	SwitchBellDingStatus = 0;
 }
 
 //*--------------------------------------------------------------------------------------
@@ -190,47 +186,17 @@ void BellUpdateSwitch(void)
 	if((!SwitchHornStatus) && SwitchBellStatus)
 	{
 
-		if(SwitchBellCnt > 0)
-		{
-			SwitchBellCnt--;
-		}
-		if(SwitchBellCnt == 0)
-		{
-			TurnBellOff();
-		}
-
-	//drive the horn to make the bell sound
-		if (BellCntOn > 0)
-		{
-			BellCntOn--;
-		}		
-		
-		
-		if (BellCntOff > 0)
-		{
-			BellCntOff--;			
-		}
-		
-		// flip the speaker from on to off
-		if(BellCntOn == 0)
-		{
-			blinker(2);
-			BellCntOff = BELL_T_OFF;
-		}
-		
-
 		//drive the horn to make the bell sound
 		if (BellCntOn > 0)
 		{
 			BellCntOn--;
 		}
 
-		if (BellCntOn > 1000)
-		{
-			LED_Red(1);
-			LED_Red(0);
-
-		}
+//		if (SwitchBellDingStatus)
+//		{
+//			LED_Red(1);
+//			LED_Red(0);
+//		}
 
 		if (BellCntOff > 0)
 		{
@@ -238,19 +204,19 @@ void BellUpdateSwitch(void)
 		}
 
 		// flip the speaker from on to off
-		if(BellCntOn == 0)
+		if(BellCntOn == 0 && SwitchBellDingStatus == 1)
 		{
 			BellCntOff = BELL_T_OFF;
-			blinker(2);
+			SwitchBellDingStatus = 0;
+			//blinker(2);
 		}
 
-		if(BellCntOff == 0)
+		if(BellCntOff == 0 && SwitchBellDingStatus == 0)
 		{
 			//blinker(3);
 			BellCntOn = BELL_T_ON;
+			SwitchBellDingStatus = 1;
 		}	
-		
-		}
 
 //regular turn entire bell process on or off
 		if(SwitchBellCnt > 0)
@@ -260,7 +226,6 @@ void BellUpdateSwitch(void)
 		if(SwitchBellCnt == 0)
 		{
 			TurnBellOff();
-			blinkerG(2);
 		}
 
 	}
@@ -308,5 +273,3 @@ uint8_t GetBellSpeakerStatus(void)
 
 
 
-=======
-}
