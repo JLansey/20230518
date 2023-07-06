@@ -12,6 +12,7 @@
 #include "Timer.h"
 #include "Switch.h"
 #include "Led.h"
+#include <stdlib.h>
 
 //global variables
 uint16_t SwitchOldTick;
@@ -22,6 +23,11 @@ uint8_t SwitchHornStatus;
 //Bell related
 //uint16_t SWITCH_BELL_DELAY;  // how long should the bell ring for?
 uint32_t SwitchBellCnt; // total count for the delay
+
+uint32_t bell_flip_cnt;
+
+uint32_t bell_t_on;
+uint32_t bell_t_off;
 
 uint32_t BellCntOn;
 uint32_t BellCntOff;
@@ -77,7 +83,12 @@ void TurnBellOn(void)
 	SwitchBellStatus = 1;
 	SwitchBellDingStatus = 1;
 	SwitchBellCnt = SWITCH_BELL_DELAY;
+	bell_t_on = BELL_T_ON;
+	bell_t_off = BELL_T_OFF;
 	BellCntOn = BELL_T_ON;
+
+	bell_flip_cnt = 0;
+	
 	BellCntOff = 0; // it will be on for one cycle then switch off
 	LED_Green(1);
 	//blinkerG(2);
@@ -95,6 +106,8 @@ void TurnBellOff(void)
 	SwitchBellStatus = 0;
 	SwitchBellDingStatus = 0;
 	LED_Green(0);
+	LED_Red(0);
+
 }
 
 //*--------------------------------------------------------------------------------------
@@ -194,12 +207,6 @@ void BellUpdateSwitch(void)
 			BellCntOn--;
 		}
 
-//		if (SwitchBellDingStatus)
-//		{
-//			LED_Red(1);
-//			LED_Red(0);
-//		}
-
 		if (BellCntOff > 0)
 		{
 			BellCntOff--;
@@ -208,17 +215,31 @@ void BellUpdateSwitch(void)
 		// flip the speaker from on to off
 		if(BellCntOn == 0 && SwitchBellDingStatus == 1)
 		{
-			BellCntOff = BELL_T_OFF;
+			BellCntOff = bell_t_off;
 			SwitchBellDingStatus = 0;
-			//blinker(2);
+			if (SwitchBellCnt < 90000)
+			{
+				if (bell_flip_cnt % 100 < 33){
+					bell_t_off = 15;
+					//LED_Red(1);
+				}
+				else
+				{
+					if (bell_flip_cnt % 100 > 66) bell_t_off = 20;
+					else bell_t_off = 10;
+				}
+			}
 		}
 
 		if(BellCntOff == 0 && SwitchBellDingStatus == 0)
 		{
 			//blinker(3);
-			BellCntOn = BELL_T_ON;
+			BellCntOn = bell_t_on;
 			SwitchBellDingStatus = 1;
+			bell_flip_cnt++;
 		}	
+
+
 
 //regular turn entire bell process on or off
 		if(SwitchBellCnt > 0)
