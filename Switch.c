@@ -13,6 +13,7 @@
 #include "Switch.h"
 #include "Led.h"
 #include <stdlib.h>
+#include <stddef.h>
 
 //global variables
 uint16_t SwitchOldTick;
@@ -23,17 +24,33 @@ uint8_t SwitchHornStatus;
 //Bell related
 //uint16_t SWITCH_BELL_DELAY;  // how long should the bell ring for?
 uint32_t SwitchBellCnt; // total count for the delay
-
 uint32_t bell_flip_cnt;
 
 uint32_t bell_t_on;
 uint32_t bell_t_off;
 
-uint32_t BellCntOn;
+uint8_t BellCntOn;
 uint32_t BellCntOff;
 
 uint8_t SwitchBellDingStatus; // are we on or off
 uint8_t SwitchBellStatus; // is it bell ringing time?
+
+// Array for the pulse data
+//uint64_t pulseCenters[PULSE_DATA_SIZE] = {0, 4, 8, 11};
+uint64_t pulseCenters[PULSE_DATA_SIZE];
+//uint64_t pulseCenters[PULSE_DATA_SIZE] = {0, 38, 76, 114};
+
+//formant hz at 1000
+//uint64_t pulseCenters[PULSE_DATA_SIZE] = {0, 4, 8, 11};
+
+//uint64_t pulseCenters[PULSE_DATA_SIZE] = {0, 150, 0, 0};
+
+uint32_t pulseWidths[PULSE_DATA_SIZE];
+
+//uint32_t pulseWidths[PULSE_DATA_SIZE] = {1, 1, 1, 1};
+//uint32_t pulseWidths[PULSE_DATA_SIZE] = {5, 16, 20, 13};
+
+
 
 //*--------------------------------------------------------------------------------------
 //* Function Name       : SwitchInit()
@@ -85,13 +102,28 @@ void TurnBellOn(void)
 	SwitchBellCnt = SWITCH_BELL_DELAY;
 	bell_t_on = BELL_T_ON;
 	bell_t_off = BELL_T_OFF;
-	BellCntOn = BELL_T_ON;
+	
+	BellCntOn = 0;// BELL_T_ON;
 
 	bell_flip_cnt = 0;
 	
 	BellCntOff = 0; // it will be on for one cycle then switch off
 	LED_Green(1);
-	//blinkerG(2);
+
+//	uint32_t fixedPulseCentersValues[PULSE_DATA_SIZE] = {0, 8, 16, 22};
+	//uint32_t fixedPulseWidthsValues[PULSE_DATA_SIZE] = {2, 5, 6, 4};
+
+	uint32_t fixedPulseCentersValues[PULSE_DATA_SIZE] = {0, 68, 136, 204};
+	uint32_t fixedPulseWidthsValues[PULSE_DATA_SIZE] = {3, 10, 13, 5};
+
+	for(int i = 0; i < PULSE_DATA_SIZE; i++)
+	{
+		pulseCenters[i] = fixedPulseCentersValues[i];
+		pulseWidths[i] = fixedPulseWidthsValues[i];
+	}
+
+//	pulseCenters[PULSE_DATA_SIZE] = {0, 8, 16, 22};
+	//pulseWidths[PULSE_DATA_SIZE] = {2, 5, 6, 4};
 			
 }
 //*--------------------------------------------------------------------------------------
@@ -136,9 +168,9 @@ void SwitchUpdate(void)
 			}
 			if(SwitchHornDebounce == TIME_SWITCH_PRESS_DET)
 			{
-				SwitchHornDebounce = 255;				//indicate switch pressed
-				SwitchHornStatus = 1;					//sets that a switch has been pressed
-				TurnBellOff();                   // turn off the bell
+				SwitchHornDebounce = 255;		//indicate switch pressed
+				SwitchHornStatus = 1;			//sets that a switch has been pressed
+				TurnBellOff();                  // turn off the bell
 			}
 		}
 		else
@@ -200,44 +232,42 @@ void BellUpdateSwitch(void)
 	//is switch off AND also are we still ringing the bell?
 	if((!SwitchHornStatus) && SwitchBellStatus)
 	{
+		
+		uint64_t currentCenter = pulseCenters[BellCntOn];
+		//uint32_t currentWidth = pulseWidths[BellCntOn];
+		uint64_t precomputedValue = (SWITCH_BELL_DELAY - SwitchBellCnt) % 296;//40;
 
-		//drive the horn to make the bell sound
-		if (BellCntOn > 0)
+		if(precomputedValue == currentCenter)
 		{
-			BellCntOn--;
+			SwitchBellDingStatus = 1;// turn on the horn
+			LED_Red(1);
+		}
+		else if(precomputedValue == (currentCenter + pulseWidths[BellCntOn]))
+		{
+			SwitchBellDingStatus = 0;// turn off the horn
+			// increment to the next pulse 
+			BellCntOn = (1 + BellCntOn) % PULSE_DATA_SIZE;
+			LED_Red(0);
 		}
 
-		if (BellCntOff > 0)
+		if ((SwitchBellCnt % 1000) == 0)
 		{
-			BellCntOff--;
-		}
-
-		// flip the speaker from on to off
-		if(BellCntOn == 0 && SwitchBellDingStatus == 1)
-		{
-			BellCntOff = bell_t_off;
-			SwitchBellDingStatus = 0;
-			if (SwitchBellCnt < 90000)
+			for(int i = 0; i < PULSE_DATA_SIZE; i++)
 			{
-				if (bell_flip_cnt % 100 < 33){
-					bell_t_off = 15;
-					//LED_Red(1);
-				}
-				else
+				if (pulseWidths[i] > 1)
 				{
-					if (bell_flip_cnt % 100 > 66) bell_t_off = 20;
-					else bell_t_off = 10;
+					pulseWidths[i] = pulseWidths[i] - 1;
 				}
 			}
 		}
+			//pulseWidths[PULSE_DATA_SIZE] = {2, 5, 6, 4};
 
-		if(BellCntOff == 0 && SwitchBellDingStatus == 0)
-		{
-			//blinker(3);
-			BellCntOn = bell_t_on;
-			SwitchBellDingStatus = 1;
-			bell_flip_cnt++;
-		}	
+		// loops, 0,1,2,3
+
+//		if (precomputedValue == (currentCenter + pulseWidths[BellCntOn])) {LED_Red(1); RTC_delayMS(1);} else LED_Red(0);
+	//	if (precomputedValue == 1) {LED_Red(1); RTC_delayMS(1);} else LED_Red(0);
+	//if ((currentCenter + pulseWidths[BellCntOn]) == 1) {LED_Red(1); RTC_delayMS(1);} else LED_Red(0);
+	//if (currentCenter == 1) {LED_Red(1);} else LED_Red(0);
 
 
 
@@ -245,7 +275,7 @@ void BellUpdateSwitch(void)
 		if(SwitchBellCnt > 0)
 		{
 			SwitchBellCnt--;
-		}
+		} else
 		if(SwitchBellCnt == 0)
 		{
 			TurnBellOff();
@@ -283,15 +313,7 @@ void SwitchClearBellStatus(void)
 
 uint8_t GetBellSpeakerStatus(void)
 {
-	if (BellCntOn > 0)
-	{
-		return 1;
-	}
-	else
-	{
-		return 0;
-	}
-	
+	return SwitchBellDingStatus;
 }
 
 
