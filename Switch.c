@@ -28,31 +28,72 @@ uint32_t SwitchBellCnt; // total count for the delay
 uint32_t bell_flip_cnt;
 
 uint32_t bell_t_on;
-uint32_t bell_t_off;
+//uint32_t bell_t_off;
 
 uint8_t BellCntOn;
-uint32_t BellCntOff;
+//uint32_t BellCntOff;
 
 uint8_t SwitchBellDingStatus; // are we on or off
 uint8_t SwitchBellStatus; // is it bell ringing time?
 
 // Array for the pulse data
-//uint64_t pulseCenters[PULSE_DATA_SIZE] = {0, 4, 8, 11};
-uint64_t pulseCenters[PULSE_DATA_SIZE];
-//uint64_t pulseCenters[PULSE_DATA_SIZE] = {0, 38, 76, 114};
-
-//formant hz at 1000
-//uint64_t pulseCenters[PULSE_DATA_SIZE] = {0, 4, 8, 11};
-
-//uint64_t pulseCenters[PULSE_DATA_SIZE] = {0, 150, 0, 0};
-
-uint32_t pulseWidths[PULSE_DATA_SIZE];
-
 uint8_t expLookupPWM[98] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9, 10, 10, 10, 10, 11, 11, 11, 12, 12, 12, 13, 13, 13, 1, 1, 1, 1};
 
-//uint32_t pulseWidths[PULSE_DATA_SIZE] = {1, 1, 1, 1};
-//uint32_t pulseWidths[PULSE_DATA_SIZE] = {5, 16, 20, 13};
 
+
+//*--------------------------------------------------------------------------------------
+//* Function Name       : BellInit()
+//* Object              : Set up user switch input
+//* Input Parameters    : none
+//* Output Parameters   : none
+//*--------------------------------------------------------------------------------------
+
+void BellInit(void)
+{
+	//maybe don't need this function at all??
+	
+	//Initialize variables used for Bell Switch
+	SwitchBellCnt = 0;	
+	BellCntOn = 0;
+	//BellCntOff = 0;
+	SwitchBellDingStatus = 0;
+	SwitchBellStatus = 0;
+
+}
+
+//*--------------------------------------------------------------------------------------
+//* Function Name       : TurnBellOn()
+//* Object              : Turn on the bell
+void TurnBellOn(void)
+{
+	// boolean the bell is ringing
+	SwitchBellStatus = 1;
+	// boolean while the bell is ringing if the horn is enabled or not
+	SwitchBellDingStatus = 1;
+	
+	SwitchBellCnt = SWITCH_BELL_DELAY;
+	
+	BellCntOn = 0;// BELL_T_ON;
+    bell_t_on = 15;
+	bell_flip_cnt = 0;
+	
+	LED_Green(1);
+}
+//*--------------------------------------------------------------------------------------
+//* Function Name       : TurnBellOff()
+//* Object              :Turn the bell off
+
+void TurnBellOff(void)
+{
+	SwitchBellCnt = 0;
+	BellCntOn = 0;
+
+	SwitchBellStatus = 0;
+	SwitchBellDingStatus = 0;
+	LED_Green(0);
+	LED_Red(0);
+
+}
 
 
 //*--------------------------------------------------------------------------------------
@@ -73,76 +114,6 @@ void SwitchInit(void)
 	SwitchOldTick = 0;
 	SwitchHornDebounce = SWITCH_HORN_DEBOUNCE_INITIAL; // 29
 	SwitchHornStatus = 0;
-}
-
-//*--------------------------------------------------------------------------------------
-//* Function Name       : BellInit()
-//* Object              : Set up user switch input
-//* Input Parameters    : none
-//* Output Parameters   : none
-//*--------------------------------------------------------------------------------------
-
-void BellInit(void)
-{
-	//maybe don't need this function at all??
-	
-	//Initialize variables used for Bell Switch
-	SwitchBellCnt = 0;	
-	BellCntOn = 0;
-	BellCntOff = 0;
-	SwitchBellDingStatus = 0;
-	SwitchBellStatus = 0;
-
-}
-
-//*--------------------------------------------------------------------------------------
-//* Function Name       : TurnBellOn()
-//* Object              : Turn on the bell
-void TurnBellOn(void)
-{
-	SwitchBellStatus = 1;
-	SwitchBellDingStatus = 1;
-	SwitchBellCnt = SWITCH_BELL_DELAY;
-	//bell_t_on = BELL_T_ON;
-	bell_t_off = BELL_T_OFF;
-	
-	BellCntOn = 0;// BELL_T_ON;
-    bell_t_on = 15;
-	bell_flip_cnt = 0;
-	
-	//BellCntOff = 0; // it will be on for one cycle then switch off
-	LED_Green(1);
-
-//	uint32_t fixedPulseCentersValues[PULSE_DATA_SIZE] = {0, 8, 16, 22};
-	//uint32_t fixedPulseWidthsValues[PULSE_DATA_SIZE] = {2, 5, 6, 4};
-
-//	uint32_t fixedPulseCentersValues[PULSE_DATA_SIZE] = {0, 68, 136, 204};
-	uint32_t fixedPulseCentersValues[PULSE_DATA_SIZE] = {0, 1, 7, 9, 10, 16, 18, 19, 26, 27, 29, 35};
-	uint32_t fixedPulseWidthsValues[PULSE_DATA_SIZE] = {2, 3, 2, 8, 6, 3, 10, 5, 4, 6, 2, 1};
-	
-	for(int i = 0; i < PULSE_DATA_SIZE; i++)
-	{
-		pulseCenters[i] = fixedPulseCentersValues[i];
-		pulseWidths[i] = fixedPulseWidthsValues[i];
-	}
-
-//	pulseCenters[PULSE_DATA_SIZE] = {0, 8, 16, 22};
-	//pulseWidths[PULSE_DATA_SIZE] = {2, 5, 6, 4};
-			
-}
-//*--------------------------------------------------------------------------------------
-//* Function Name       : TurnBellOff()
-//* Object              :Turn the bell off
-
-void TurnBellOff(void)
-{
-	SwitchBellCnt = 0;
-	BellCntOn = 0;
-
-	SwitchBellStatus = 0;
-	SwitchBellDingStatus = 0;
-	LED_Green(0);
-	LED_Red(0);
 
 }
 
