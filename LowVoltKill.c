@@ -204,25 +204,14 @@ void BellUpdateRing()
 {
 	
 	// switch from on to off if we need to
-	//Horn_Enable(GetBellSpeakerStatus());
-	//GetBellSpeakerStatus();
-	if(SwitchBellGetStatus())
+	if (GetBellSpeakerStatus())
 	{
-		//LED_Green(1);
-		if (GetBellSpeakerStatus())
-		{
-			//LED_Red(0);
-			Horn_Enable(1);
-		}
-		else
-		{
-			Horn_Enable(0);
-		}
+		//LED_Red(0);
+		Horn_Enable(1);
 	}
 	else
 	{
-		//LED_Green(0);
+		Horn_Enable(0);
 	}
-	
 
 }

@@ -14,6 +14,7 @@
 #include "Led.h"
 #include <stdlib.h>
 #include <stddef.h>
+#include <math.h>
 
 //global variables
 uint16_t SwitchOldTick;
@@ -46,6 +47,8 @@ uint64_t pulseCenters[PULSE_DATA_SIZE];
 //uint64_t pulseCenters[PULSE_DATA_SIZE] = {0, 150, 0, 0};
 
 uint32_t pulseWidths[PULSE_DATA_SIZE];
+
+uint8_t expLookupPWM[98] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9, 10, 10, 10, 10, 11, 11, 11, 12, 12, 12, 13, 13, 13, 14, 14, 14, 14};
 
 //uint32_t pulseWidths[PULSE_DATA_SIZE] = {1, 1, 1, 1};
 //uint32_t pulseWidths[PULSE_DATA_SIZE] = {5, 16, 20, 13};
@@ -100,22 +103,23 @@ void TurnBellOn(void)
 	SwitchBellStatus = 1;
 	SwitchBellDingStatus = 1;
 	SwitchBellCnt = SWITCH_BELL_DELAY;
-	bell_t_on = BELL_T_ON;
+	//bell_t_on = BELL_T_ON;
 	bell_t_off = BELL_T_OFF;
 	
 	BellCntOn = 0;// BELL_T_ON;
-
+    bell_t_on = 15;
 	bell_flip_cnt = 0;
 	
-	BellCntOff = 0; // it will be on for one cycle then switch off
+	//BellCntOff = 0; // it will be on for one cycle then switch off
 	LED_Green(1);
 
 //	uint32_t fixedPulseCentersValues[PULSE_DATA_SIZE] = {0, 8, 16, 22};
 	//uint32_t fixedPulseWidthsValues[PULSE_DATA_SIZE] = {2, 5, 6, 4};
 
-	uint32_t fixedPulseCentersValues[PULSE_DATA_SIZE] = {0, 68, 136, 204};
-	uint32_t fixedPulseWidthsValues[PULSE_DATA_SIZE] = {3, 10, 13, 5};
-
+//	uint32_t fixedPulseCentersValues[PULSE_DATA_SIZE] = {0, 68, 136, 204};
+	uint32_t fixedPulseCentersValues[PULSE_DATA_SIZE] = {0, 1, 7, 9, 10, 16, 18, 19, 26, 27, 29, 35};
+	uint32_t fixedPulseWidthsValues[PULSE_DATA_SIZE] = {2, 3, 2, 8, 6, 3, 10, 5, 4, 6, 2, 1};
+	
 	for(int i = 0; i < PULSE_DATA_SIZE; i++)
 	{
 		pulseCenters[i] = fixedPulseCentersValues[i];
@@ -224,6 +228,7 @@ void SwitchClearHornStatus(void)
 //* Output Parameters   : none
 //*--------------------------------------------------------------------------------------
 
+
 void BellUpdateSwitch(void)
 {
 	//***********************************
@@ -232,10 +237,52 @@ void BellUpdateSwitch(void)
 	//is switch off AND also are we still ringing the bell?
 	if((!SwitchHornStatus) && SwitchBellStatus)
 	{
+
+			BellCntOn = (1 + BellCntOn) % 23;
+
+			if(BellCntOn < bell_t_on)
+			{
+				SwitchBellDingStatus = 1;// turn on the horn
+				LED_Red(1);
+			}
+			else
+			{
+				SwitchBellDingStatus = 0;// turn off the horn
+				LED_Red(0);
+			}
+			
+			bell_t_on = expLookupPWM[(SwitchBellCnt + 10000) >> 9];
+			//bell_t_on = (bell_t_on > 10) ? 0 : bell_t_on;
+			
+/*
+			if((SwitchBellCnt >> 9) > 13)
+			{
+				LED_Red(1);
+			}
+			else
+			{
+				LED_Red(0);
+			}*/
+
+
+			// compute the max of two things, to simulate exponential decrease
+			//bell_t_on = ((SwitchBellCnt >> 12) + 3 > (SwitchBellCnt >> 13) + 6) ? (SwitchBellCnt >> 12) + 3 : (SwitchBellCnt >> 13) + 6;			
+
+			//bell_flip_cnt = 0;
+//			if (SwitchBellCnt % 1000 == 0){
+	//			if (bell_t_on > 0)
+		//			{
+						//bell_t_on --;
+			//		}
+			//}
+			
+
+
 		
+/*
 		uint64_t currentCenter = pulseCenters[BellCntOn];
 		//uint32_t currentWidth = pulseWidths[BellCntOn];
-		uint64_t precomputedValue = (SWITCH_BELL_DELAY - SwitchBellCnt) % 296;//40;
+		uint64_t precomputedValue = (SWITCH_BELL_DELAY - SwitchBellCnt) % 40;//40;
 
 		if(precomputedValue == currentCenter)
 		{
@@ -249,8 +296,11 @@ void BellUpdateSwitch(void)
 			BellCntOn = (1 + BellCntOn) % PULSE_DATA_SIZE;
 			LED_Red(0);
 		}
+*/
 
-		if ((SwitchBellCnt % 1000) == 0)
+//		if ((SwitchBellCnt % 1000) == 0)
+/*
+		if (1 == 2)
 		{
 			for(int i = 0; i < PULSE_DATA_SIZE; i++)
 			{
@@ -259,7 +309,7 @@ void BellUpdateSwitch(void)
 					pulseWidths[i] = pulseWidths[i] - 1;
 				}
 			}
-		}
+		}*/
 			//pulseWidths[PULSE_DATA_SIZE] = {2, 5, 6, 4};
 
 		// loops, 0,1,2,3
