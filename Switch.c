@@ -55,7 +55,6 @@ void BellInit(void)
 	//Initialize variables used for Bell Switch
 	SwitchBellCnt = 0;	
 	BellCntOn = 0;
-	//BellCntOff = 0;
 	SwitchBellDingStatus = 0;
 	SwitchBellStatus = 0;
 
@@ -141,6 +140,10 @@ void SwitchUpdate(void)
 			{
 				SwitchHornDebounce++;
 			}
+			if(SwitchHornDebounce == BELL_DEBOUNCE_T)
+			{
+				TurnBellOn();
+			}
 			if(SwitchHornDebounce == TIME_SWITCH_PRESS_DET)
 			{
 				SwitchHornDebounce = 255;		//indicate switch pressed
@@ -209,87 +212,22 @@ void BellUpdateSwitch(void)
 	if((!SwitchHornStatus) && SwitchBellStatus)
 	{
 
-			BellCntOn = (1 + BellCntOn) % 23;
+			BellCntOn = (1 + BellCntOn) % 19;
 
 			if(BellCntOn < bell_t_on)
 			{
 				SwitchBellDingStatus = 1;// turn on the horn
-				LED_Red(1);
+				//LED_Red(1);
 			}
 			else
 			{
 				SwitchBellDingStatus = 0;// turn off the horn
-				LED_Red(0);
+				//LED_Red(0);
 			}
 			
 			bell_t_on = expLookupPWM[(SwitchBellCnt + 10000) >> 9];
 			//bell_t_on = (bell_t_on > 10) ? 0 : bell_t_on;
 			
-/*
-			if((SwitchBellCnt >> 9) > 13)
-			{
-				LED_Red(1);
-			}
-			else
-			{
-				LED_Red(0);
-			}*/
-
-
-			// compute the max of two things, to simulate exponential decrease
-			//bell_t_on = ((SwitchBellCnt >> 12) + 3 > (SwitchBellCnt >> 13) + 6) ? (SwitchBellCnt >> 12) + 3 : (SwitchBellCnt >> 13) + 6;			
-
-			//bell_flip_cnt = 0;
-//			if (SwitchBellCnt % 1000 == 0){
-	//			if (bell_t_on > 0)
-		//			{
-						//bell_t_on --;
-			//		}
-			//}
-			
-
-
-		
-/*
-		uint64_t currentCenter = pulseCenters[BellCntOn];
-		//uint32_t currentWidth = pulseWidths[BellCntOn];
-		uint64_t precomputedValue = (SWITCH_BELL_DELAY - SwitchBellCnt) % 40;//40;
-
-		if(precomputedValue == currentCenter)
-		{
-			SwitchBellDingStatus = 1;// turn on the horn
-			LED_Red(1);
-		}
-		else if(precomputedValue == (currentCenter + pulseWidths[BellCntOn]))
-		{
-			SwitchBellDingStatus = 0;// turn off the horn
-			// increment to the next pulse 
-			BellCntOn = (1 + BellCntOn) % PULSE_DATA_SIZE;
-			LED_Red(0);
-		}
-*/
-
-//		if ((SwitchBellCnt % 1000) == 0)
-/*
-		if (1 == 2)
-		{
-			for(int i = 0; i < PULSE_DATA_SIZE; i++)
-			{
-				if (pulseWidths[i] > 1)
-				{
-					pulseWidths[i] = pulseWidths[i] - 1;
-				}
-			}
-		}*/
-			//pulseWidths[PULSE_DATA_SIZE] = {2, 5, 6, 4};
-
-		// loops, 0,1,2,3
-
-//		if (precomputedValue == (currentCenter + pulseWidths[BellCntOn])) {LED_Red(1); RTC_delayMS(1);} else LED_Red(0);
-	//	if (precomputedValue == 1) {LED_Red(1); RTC_delayMS(1);} else LED_Red(0);
-	//if ((currentCenter + pulseWidths[BellCntOn]) == 1) {LED_Red(1); RTC_delayMS(1);} else LED_Red(0);
-	//if (currentCenter == 1) {LED_Red(1);} else LED_Red(0);
-
 
 
 //regular turn entire bell process on or off

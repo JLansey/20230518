@@ -54,7 +54,8 @@ int main(void)
 	Horn_init();
 	BellInit();
 	LowVoltKill_init();
-	TurnBellOn(); // if you are starting up - you better have the bell on!	
+	TurnBellOn(); // if you are starting up - you better have the bell on!
+	//blinker(3);
 	
 	LowSpeed = 0;
 	

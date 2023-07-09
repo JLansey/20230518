@@ -9,9 +9,10 @@
 ******************************************************************************************/
 
 //timing defines
-#define TIME_SWITCH_PRESS_DET	15	//Time in mS to detect Switch pressed
+#define TIME_SWITCH_PRESS_DET	100	//Time in mS to detect Switch pressed
 #define TIME_SWITCH_RELEASE_DET 15	//Time in mS to detect Switch released
-#define SWITCH_HORN_DEBOUNCE_INITIAL 14 // Starting the debounce counter up closer
+#define SWITCH_HORN_DEBOUNCE_INITIAL 0 // Starting the debounce counter up closer
+#define BELL_DEBOUNCE_T 15
 		
 	
 	
