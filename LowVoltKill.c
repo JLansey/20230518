@@ -126,8 +126,6 @@ void LowVoltKill_update(void)
 				{
 					// turn back on - is necessary for low volt kill
 					Horn_Enable(1);
-					//LED_Green(1);
-					//Horn_Enable(0);
 					LowVoltkillTimer_mS = LOW_VOLT_LOW_BATT_BEEP;
 					LowVoltState = LOW_VOLT_STATE_END_BEEP;
 				}
@@ -140,9 +138,7 @@ void LowVoltKill_update(void)
 			{
 				if(SwitchHornGetStatus())
 				{
-					// TURN the horn back on here if you want to!!!
 					Horn_Enable(1);
-					//Horn_Enable(0);
 					//LED_Green(1);
 
 					//stop honking horn if max on time expired
