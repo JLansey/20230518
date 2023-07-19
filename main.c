@@ -16,7 +16,7 @@
 #include <avr/wdt.h>
 
 #include "Switch.h"
-//#include "ADC.h"
+#include "ADC.h"
 #include "Timer.h"
 #include "Led.h"
 #include "Charger.h"
@@ -40,6 +40,8 @@ FUSES = {
 
 uint8_t LowSpeed;
 
+extern uint16_t Charge_Seconds_Count;
+
 
 int main(void)
 {
@@ -54,6 +56,7 @@ int main(void)
 	Horn_init();
 	BellInit();
 	LowVoltKill_init();
+	ADC_Init();
 	TurnBellOn(); // if you are starting up - you better have the bell on!
 	//blinker(3);
 	
@@ -66,8 +69,9 @@ int main(void)
 	{
 		wdt_reset();
 		SwitchUpdate();
+		ADC_Update();
+		Charger_update();
 		BellUpdateSwitch();
-
 		//If Charging: LED's are controlled by Charger, and horn is forced off
 		if(!(CHARGER_PWR_GOOD_PORT.IN & CHARGER_PWR_GOOD_BIT))
 		{
@@ -82,7 +86,7 @@ int main(void)
 			LED_Green(0);
 
 			//LED_update();//////////////
-			if(CHARGER_STATUS_PORT.IN & CHARGER_STATUS_BIT) // battery is fully charged
+			if((CHARGER_STATUS_PORT.IN & CHARGER_STATUS_BIT) || (Charge_Seconds_Count == 0)) // battery is fully charged
 			{
 				LED_Red(0);
 			    LED_Green(1);
@@ -96,7 +100,7 @@ int main(void)
 		}
 
 		else
-		//Not charging, honk horn unless fault found
+		//Not charging, hong horn unless fault found
 		{
 			if(LowSpeed == 1)
 			{

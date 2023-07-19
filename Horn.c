@@ -26,7 +26,7 @@ void Horn_init(void)
 
 
 //*--------------------------------------------------------------------------------------
-//* Function Name       : Horn_Enable()
+//* Function Name       : Horn_init()
 //* Object              : setup I/O pins used by horn
 //* Input Parameters    : uint8_t Enable = true to turn horn on
 //* Output Parameters   : none

@@ -8,6 +8,12 @@
 **
 ******************************************************************************************/
 
+//defines for Charger Timing
+#define CHARGE_COUNT_1_SECOND	1000
+#define CHARGE_FULL_MAX_MINUTES 10
+#define CHARGE_FULL_MAX_SECONDS (CHARGE_FULL_MAX_MINUTES * 60) 	//Convert Minutes to Max seconds
+#define CHARGE_LEVEL_CHARGED	0xd0							//ADC count when charge is finished
+
 //defines for charger I/O pins
 #define CHARGER_PWR_GOOD_PORT	PORTA
 #define CHARGER_PWR_GOOD_PIN	4
@@ -21,3 +27,5 @@
 
 //Prototypes
 void Charger_init(void);
+void Charger_update(void);
+void Charger_TimerReset(void);

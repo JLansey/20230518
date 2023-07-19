@@ -43,11 +43,11 @@ void LowVoltKill_init(void)
 {
 	//configure pins
 	VOLT_KILL_AC_PORT.OUTCLR = VOLT_KILL_AC_BIT;
-	VOLT_KILL_ADC_PORT.OUTCLR = VOLT_KILL_ADC_BIT;
+	//VOLT_KILL_ADC_PORT.OUTCLR = VOLT_KILL_ADC_BIT;
 
 	//disable inputs
 	VOLT_KILL_AC_CTRL = (4 << PORT_ISC0_bp);
-	VOLT_KILL_ADC_CTRL = (4 << PORT_ISC0_bp);
+	//VOLT_KILL_ADC_CTRL = (4 << PORT_ISC0_bp);
    
 	//Setup DAC
 	DAC0.CTRLA = DAC_OUTEN_bm | DAC_ENABLE_bm;
