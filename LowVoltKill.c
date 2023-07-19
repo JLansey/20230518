@@ -114,6 +114,7 @@ void LowVoltKill_update(void)
 			case LOW_VOLT_STATE_CHECK_HORN0:
 			{
 				Horn_Enable(0);
+				//LED_Green(0);
 
 				if(SwitchHornGetStatus())
 				{
@@ -123,6 +124,7 @@ void LowVoltKill_update(void)
 				
 				else if(LowVoltkillTimer_mS == 0 && LowVoltDetected)
 				{
+					// turn back on - is necessary for low volt kill
 					Horn_Enable(1);
 					LowVoltkillTimer_mS = LOW_VOLT_LOW_BATT_BEEP;
 					LowVoltState = LOW_VOLT_STATE_END_BEEP;
@@ -137,6 +139,7 @@ void LowVoltKill_update(void)
 				if(SwitchHornGetStatus())
 				{
 					Horn_Enable(1);
+					//LED_Green(1);
 
 					//stop honking horn if max on time expired
 					if(LowVoltkillTimer_mS  == 0)
@@ -182,6 +185,7 @@ void LowVoltKill_update(void)
 				if(LowVoltkillTimer_mS == 0)
 				{
 					Horn_Enable(0);
+					//LED_Green(0);
 				}
 			}
 
@@ -193,4 +197,22 @@ void LowVoltKill_update(void)
 			}
 		}
 	}
+}
+
+
+void BellUpdateRing()
+{
+	if (SwitchBellGetStatus())
+	{
+		// switch from on to off if we need to
+		if (GetBellSpeakerStatus())
+		{
+			Horn_Enable(1);
+		}
+		else
+		{
+			Horn_Enable(0);
+		}
+	}
+
 }

@@ -25,3 +25,6 @@ void LED_init(void);
 void LED_Red(uint8_t Enable);
 void LED_Green(uint8_t Enable);
 void LED_update(void);
+
+void blinker(uint8_t n);
+void blinkerG(uint8_t n);

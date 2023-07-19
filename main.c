@@ -54,8 +54,11 @@ int main(void)
 	SwitchInit();
 	Charger_init();
 	Horn_init();
+	BellInit();
 	LowVoltKill_init();
 	ADC_Init();
+	TurnBellOn(); // if you are starting up - you better have the bell on!
+	//blinker(3);
 	
 	LowSpeed = 0;
 	
@@ -68,7 +71,7 @@ int main(void)
 		SwitchUpdate();
 		ADC_Update();
 		Charger_update();
-
+		BellUpdateSwitch();
 		//If Charging: LED's are controlled by Charger, and horn is forced off
 		if(!(CHARGER_PWR_GOOD_PORT.IN & CHARGER_PWR_GOOD_BIT))
 		{
@@ -80,7 +83,7 @@ int main(void)
 			}
 
 			Horn_Enable(0);
-			// LED_Green(0);
+			LED_Green(0);
 
 			//LED_update();//////////////
 			if((CHARGER_STATUS_PORT.IN & CHARGER_STATUS_BIT) || (Charge_Seconds_Count == 0)) // battery is fully charged
@@ -107,8 +110,10 @@ int main(void)
 			}
 
 			//LED_update();///////////////////
-			LED_Green(0);
+			//LED_Green(0);
 			LowVoltKill_update();
+			BellUpdateRing();
+			
 		}
 	}
 }

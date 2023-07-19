@@ -13,7 +13,7 @@
 //Timing Defines
 #define LOW_VOLT_KILL_DAC_CNT				0x2D
 #define LOW_VOLT_LOW_BATT_DAC_CNT			0x2f
-#define LOW_VOLT_KILL_TIMEOUT				10
+#define LOW_VOLT_KILL_TIMEOUT				10 // time between honk ending and the low battery sound (I think)
 #define LOW_VOLT_LOW_BATT_DET_TIME			100
 #define LOW_VOLT_TIME_WAIT_LOW_BATT_BEEP	100 // time delay from honk
 #define LOW_VOLT_LOW_BATT_BEEP				100 // length of time it is honking for
@@ -31,6 +31,8 @@
 #define VOLT_KILL_ADC_BIT			(1 << VOLT_KILL_ADC_PIN)
 #define VOLT_KILL_ADC_CTRL			PORTA.PIN7CTRL
 
+
 //Prototypes
 void LowVoltKill_init(void);
 void LowVoltKill_update(void);
+void BellUpdateRing(void);
