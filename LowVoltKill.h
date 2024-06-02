@@ -15,9 +15,19 @@
 #define LOW_VOLT_LOW_BATT_DAC_CNT			0x2f
 #define LOW_VOLT_KILL_TIMEOUT				10
 #define LOW_VOLT_LOW_BATT_DET_TIME			100
-#define LOW_VOLT_TIME_WAIT_LOW_BATT_BEEP	100 // time delay from honk
-#define LOW_VOLT_LOW_BATT_BEEP				100 // length of time it is honking for
+#define LOW_VOLT_TIME_WAIT_LOW_BATT_BEEP	1000
+#define LOW_VOLT_LOW_BATT_BEEP				250
 #define LOW_VOLT_TIME_MAX_HORN_ON_TIME		10000
+
+typedef enum {
+	LOW_VOLT_STATE_INIT,          // 0
+	LOW_VOLT_STATE_KILL,          // 1
+	LOW_VOLT_STATE_CHECK_BELL,    // 2
+	LOW_VOLT_STATE_CHECK_HORN0,   // 3
+	LOW_VOLT_STATE_CHECK_HORN1,   // 4
+	LOW_VOLT_STATE_END_BEEP,      // 5
+	LOW_VOLT_STATE_DEAD           // 6
+} LowVoltStates;
 
 
 //Defines for I/O

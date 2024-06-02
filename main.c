@@ -27,13 +27,13 @@
 
 FUSES = {
 	.WDTCFG = PERIOD_2KCLK_gc | WINDOW_OFF_gc,
-	.BODCFG = ACTIVE_ENABLED_gc | LVL_BODLEVEL7_gc, // brownout detect voltage
+	.BODCFG = ACTIVE_ENABLED_gc | LVL_BODLEVEL7_gc,
 	//.OSCCFG = FREQSEL_20MHZ_gc,
 	.OSCCFG = FREQSEL_16MHZ_gc,
 	.reserved_1 = {0xFF},
 	.TCD0CFG = 0x00,
 	.SYSCFG0 = CRCSRC_NOCRC_gc | RSTPINCFG_UPDI_gc,
-	.SYSCFG1 = SUT_4MS_gc, // startup time for the processer, how long do you wait
+	.SYSCFG1 = SUT_64MS_gc,
 	.APPEND = 0x00,
 	.BOOTEND = BOOTEND_FUSE
 };
@@ -51,7 +51,7 @@ int main(void)
 	LED_init();
 	SwitchInit();
 	Charger_init();
-	Horn_init();
+	//Bell_Init();
 	LowVoltKill_init();
 	
 	LowSpeed = 0;
@@ -74,20 +74,17 @@ int main(void)
 				LowSpeed = 1;
 			}
 
-			Horn_Enable(0);
-			// LED_Green(0);
+			Horn_Enable(HORN_OFF);
+			LED_Green(1);
 
 			//LED_update();//////////////
-			if(CHARGER_STATUS_PORT.IN & CHARGER_STATUS_BIT) // battery is fully charged
-			{
-				LED_Red(0);
-			    LED_Green(1);
-
-			}
-			else // battery is charging
+			if(!(CHARGER_STATUS_PORT.IN & CHARGER_STATUS_BIT))
 			{
 				LED_Red(1);
-				LED_Green(0);
+			}
+			else
+			{
+				LED_Red(0);
 			}
 		}
 

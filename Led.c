@@ -40,7 +40,7 @@ void LED_init(void)
 //*--------------------------------------------------------------------------------------
 //* Function Name       : LED_Red()
 //* Object              : enable or disable Red LED
-//* Input Parameters    : uint8_t Enable = true ti light RED LED
+//* Input Parameters    : uint8_t Enable = true if light RED LED
 //* Output Parameters   : none
 //*--------------------------------------------------------------------------------------
 
@@ -60,7 +60,7 @@ void LED_Red(uint8_t Enable)
 //*--------------------------------------------------------------------------------------
 //* Function Name       : LED_Green()
 //* Object              : enable or disable Green LED
-//* Input Parameters    : uint8_t Enable = true ti light RED LED
+//* Input Parameters    : uint8_t Enable = true if light Green LED
 //* Output Parameters   : none
 //*--------------------------------------------------------------------------------------
 
