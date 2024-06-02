@@ -12,15 +12,46 @@
 #include "Horn.h"
 #include "Timer.h"
 
+#define KEY_FREQ 2000
+#define FREQ_ALTERNATE 2010
+
 // Create a table of PWM settings
-PWMSetting pwm_settings[]=
+PWMSetting pwm_settings[] =
 {
-	{1, 2500, 50},
-	{400, 1000, 50},
-	{400, 1500, 50},
-	{400, 2000, 50},
-	{400, 2500, 50},
-	{0, 2500, 100},
+	// First part (unchanged)
+	{  1, KEY_FREQ,       1  },
+	{  5, FREQ_ALTERNATE, 2  },
+	{  5, KEY_FREQ,       4  },
+	{  5, FREQ_ALTERNATE, 6  },
+	{  5, KEY_FREQ,       8  },
+	{  5, FREQ_ALTERNATE, 9  },
+	{  5, KEY_FREQ,      10  },
+	{ 40, FREQ_ALTERNATE,20  },
+	{ 20, KEY_FREQ,      30  },
+	{ 10, FREQ_ALTERNATE,40  },
+	{  5, KEY_FREQ,      50  },
+	// Second part (exponential decay)
+	{180, KEY_FREQ,       50 },
+	{ 60, FREQ_ALTERNATE, 55 },
+	{180, KEY_FREQ,       50 }, 
+	{ 60, FREQ_ALTERNATE, 45 }, 
+	{180, KEY_FREQ,       40 }, 
+	{ 60, FREQ_ALTERNATE, 36 }, 
+	{180, KEY_FREQ,       32 }, 
+	{ 60, FREQ_ALTERNATE, 29 }, 
+	{180, KEY_FREQ,       26 }, 
+	{ 60, FREQ_ALTERNATE, 23 }, 
+	{180, KEY_FREQ,       21 }, 
+	{ 60, FREQ_ALTERNATE, 18 }, 
+	{180, KEY_FREQ,       16 }, 
+	{ 60, FREQ_ALTERNATE, 14 }, 
+	{180, KEY_FREQ,       13 }, 
+	{ 60, FREQ_ALTERNATE, 11 }, 
+	{180, KEY_FREQ,       10 }, 
+	{ 60, FREQ_ALTERNATE,  9 }, 
+	{180, KEY_FREQ,        8 }, 
+	// End of sequence
+	{  0, 2500,         100 },
 };
 
 uint16_t Horn_Timer;

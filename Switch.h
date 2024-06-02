@@ -11,6 +11,9 @@
 //timing defines
 #define TIME_SWITCH_PRESS_DET	30	//Time in mS to detect Switch pressed
 #define TIME_SWITCH_RELEASE_DET 30	//Time in mS to detect Switch released
+
+
+#define SWITCH_HORN_DEBOUNCE_INITIAL 14 // Starting the debounce counter up closer
 	
 //Horn Switch
 #define SWITCH_HORN_PORT		PORTB
