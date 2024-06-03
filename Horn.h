@@ -35,3 +35,5 @@ typedef struct
 void Bell_Init(void);
 void Horn_Enable(uint8_t Enable);
 uint8_t Horn_Update(void);
+uint8_t Bell_LowVolt(void);
+

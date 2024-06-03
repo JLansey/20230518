@@ -117,7 +117,8 @@ void LowVoltKill_update(void)
 				
 					else if(LowVoltkillTimer_mS == 0 && LowVoltDetected)
 					{
-						Horn_Enable(HORN_ON);
+						//Horn_Enable(HORN_ON);
+						Bell_LowVolt();
 						LowVoltkillTimer_mS = LOW_VOLT_LOW_BATT_BEEP;
 						LowVoltState = LOW_VOLT_STATE_END_BEEP;
 					}

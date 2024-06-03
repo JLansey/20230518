@@ -119,6 +119,7 @@ void Bell_Init(void)
 	// Set HORN as an output
 	HORN_PORT.DIRSET = HORN_BIT;
 
+	// really this is a bell timer
 	Horn_Timer = 0;
 	Horn_Index = 0;
 
@@ -128,7 +129,7 @@ void Bell_Init(void)
 
 //*--------------------------------------------------------------------------------------
 //* Function Name       : Horn_Update()
-//* Object              : update the horn engine
+//* Object              : this really is what controlls the bell!
 //* Input Parameters    : none
 //* Output Parameters   : uint8_t = 1 if Bell still running
 //*--------------------------------------------------------------------------------------
@@ -187,6 +188,66 @@ uint8_t Horn_Update(void)
 
 				// Set Timer
 				Horn_Timer = pwm_settings[Horn_Index].TimeNextStep;
+			}
+		}
+	}
+	return Status;
+}
+
+uint8_t Bell_LowVolt(void)
+{
+	uint8_t Status = 0;
+
+	if (Horn_OldTick != RTC_getTick())
+	{
+		Horn_OldTick = RTC_getTick();
+
+		if (Horn_Timer)
+		{
+			Status = 1;
+			Horn_Timer--;
+		}
+		else
+		{
+			if (pwm_settings_lowvolt[Horn_Index].TimeNextStep != 0)
+			{
+				Status = 1;
+
+				Horn_Index++; // Advance to the next cycle
+
+				// Clamp the frequency to a valid range
+				uint16_t frequency = pwm_settings_lowvolt[Horn_Index].frequency;
+				if (frequency < MIN_FREQ)
+				frequency = MIN_FREQ;
+				else if (frequency > MAX_FREQ)
+				frequency = MAX_FREQ;
+
+				// Calculate the top value based on frequency
+				uint16_t top_value = (HORN_CPU_CLOCK / 64 / frequency) - 1; // Prescaler of 64
+
+				// Ensure the top value is within a valid range
+				if (top_value == 0 || top_value >= 65536)
+				top_value = 65535;
+
+				// Set the double-buffered PER value for the desired frequency
+				TCA0.SINGLE.PERBUF = top_value;
+
+				// Limit duty cycle to 100%
+				uint8_t duty_cycle = pwm_settings_lowvolt[Horn_Index].duty_cycle;
+				if (duty_cycle > 100)
+				duty_cycle = 100;
+
+				// Calculate and set the double-buffered CMP0 safely
+				uint16_t cmp_value = (top_value * duty_cycle) / 100;
+
+				// Handle special case for 100% duty cycle
+				if (duty_cycle == 100)
+				cmp_value = top_value;
+
+				TCA0.SINGLE.CMP0BUF = (cmp_value <= top_value) ? cmp_value : top_value;
+
+				// Set Timer
+				Horn_Timer = pwm_settings_lowvolt[Horn_Index].TimeNextStep;
 			}
 		}
 	}
