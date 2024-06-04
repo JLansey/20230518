@@ -287,4 +287,8 @@ void Horn_Enable(uint8_t Enable)
 	{
 		Bell_Init();
 	}
+	else if(Enable == HORN_LOWBATT)
+	{
+		
+	}
 }

@@ -52,7 +52,7 @@ int main(void)
 	LED_init();
 	SwitchInit();
 	Charger_init();
-	//Bell_Init();
+	// Bell_Init();
 	LowVoltKill_init();
 	
 	LowSpeed = 0;

@@ -20,7 +20,8 @@
 typedef enum {
 	HORN_OFF,  // 0
 	HORN_ON,   // 1
-	HORN_BELL  // 2
+	HORN_BELL,  // 2
+	HORN_LOWBATT // 3
 } HornState;
 
 typedef struct
