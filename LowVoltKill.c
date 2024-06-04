@@ -115,10 +115,19 @@ void LowVoltKill_update(void)
 				{
 					DAC0.DATA = LOW_VOLT_LOW_BATT_DAC_CNT;
 					LowVoltkillTimer_mS = LOW_VOLT_TIME_MAX_HORN_ON_TIME;
-					LowVoltState = LOW_VOLT_STATE_CHECK_HORN1;
+					if(SwitchHornGetStatus())
+					{
+						ButtonTurnedOn = 1;
+						LowVoltState = LOW_VOLT_STATE_CHECK_HORN1;
+					}
+					else
+					{
+						ButtonTurnedOn = 0;
+						LowVoltState = LOW_VOLT_STATE_CHECK_HORN0;
+					}
 				}
 				
-				ButtonTurnedOn = SwitchHornGetStatus();
+				//ButtonTurnedOn = SwitchHornGetStatus();
 				break;
 			}
 			
@@ -191,7 +200,7 @@ void LowVoltKill_update(void)
 				if(SwitchHornGetStatus())
 				{
 
-					// if you are commited to honk for 250 ms
+					// if you are commited to honk
 					if (BellDebounceTimer_mS == 0){
 						Horn_Enable(HORN_ON);
 						LED_Green(1);
@@ -232,7 +241,7 @@ void LowVoltKill_update(void)
 					}
 					else
 					{
-						Horn_Enable(BELL);
+						Horn_Enable(BELL_CHARGING);
 					}
 
 				}
@@ -245,6 +254,8 @@ void LowVoltKill_update(void)
 				if(SwitchHornGetStatus())
 				{
 					LowVoltkillTimer_mS = LOW_VOLT_TIME_MAX_HORN_ON_TIME;
+					BellDebounceTimer_mS = BELL_DEBOUNCE_T;
+					
 					LowVoltState = LOW_VOLT_STATE_CHECK_HORN1;
 				}
 			

@@ -16,7 +16,7 @@
 #define LOW_VOLT_KILL_TIMEOUT				10
 #define LOW_VOLT_LOW_BATT_DET_TIME			100
 #define LOW_VOLT_TIME_WAIT_LOW_BATT_BEEP	1000 // time delay from honk
-#define LOW_VOLT_LOW_BATT_BEEP				250  // length of time it is honking for
+#define LOW_VOLT_LOW_BATT_BEEP				1000  // length of time it is honking for
 #define LOW_VOLT_TIME_MAX_HORN_ON_TIME		10000
 
 // amount of time to decide if you mean to honk, or only mean to ring the bell

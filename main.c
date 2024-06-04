@@ -84,8 +84,9 @@ int main(void)
 			{
 				LED_Red(1);
 				//if (!charging_flag) {
-				//Bell_Update(BELL_CHARGING);
-				LED_Green(1);
+				Bell_Update(BELL_CHARGING);
+				//LowVoltKill_update();
+				//LED_Green(1);
 				//}
 				charging_flag = true;
 			}
