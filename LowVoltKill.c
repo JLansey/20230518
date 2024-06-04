@@ -26,6 +26,9 @@ uint8_t LowVoltState;
 
 uint16_t BellDebounceTimer_mS;
 
+// will be true if the switch was depressed when the horn was turned on
+// will be false if it was turned on by plugging it into the charger
+uint8_t ButtonTurnedOn = 0; 
 
 //*--------------------------------------------------------------------------------------
 //* Function Name       : LowVoltKill_init()
@@ -114,6 +117,8 @@ void LowVoltKill_update(void)
 					LowVoltkillTimer_mS = LOW_VOLT_TIME_MAX_HORN_ON_TIME;
 					LowVoltState = LOW_VOLT_STATE_CHECK_HORN1;
 				}
+				
+				ButtonTurnedOn = SwitchHornGetStatus();
 				break;
 			}
 			
@@ -157,7 +162,7 @@ void LowVoltKill_update(void)
 			{
 
 				Horn_Enable(HORN_OFF);
-				LED_Green(0);
+				//LED_Green(0);
 
 				if(SwitchHornGetStatus())
 				{
@@ -221,7 +226,14 @@ void LowVoltKill_update(void)
 				{
 					LowVoltkillTimer_mS = LOW_VOLT_TIME_WAIT_LOW_BATT_BEEP;
 					LowVoltState = LOW_VOLT_STATE_CHECK_BELL;
-					Horn_Enable(BELL);
+					if (ButtonTurnedOn)
+					{
+						Horn_Enable(BELL);
+					}
+					else
+					{
+						Horn_Enable(BELL);
+					}
 
 				}
 				break;
@@ -239,7 +251,7 @@ void LowVoltKill_update(void)
 				if(LowVoltkillTimer_mS == 0)
 				{
 					Horn_Enable(HORN_OFF);
-					LED_Green(0);
+					//LED_Green(0);
 					Bell_Update(BELL_LOWVOLT);
 
 				}

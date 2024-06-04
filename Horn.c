@@ -61,8 +61,6 @@ PWMSetting pwm_charging[] =
 	// First part (unchanged)
 	{  1, 1318 * 2, 10},
 	{  255, 1318 * 2, 40},
-	{  2, 1318 * 2, 10  },
-	{  2, 1480 * 2, 10  },
 	{  255, 1480 * 2, 40  },
 
 	// End of sequence
