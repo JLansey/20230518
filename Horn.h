@@ -20,9 +20,10 @@
 typedef enum {
 	HORN_OFF,  // 0
 	HORN_ON,   // 1
-	HORN_BELL,  // 2
-	HORN_LOWBATT // 3
-} HornState;
+	BELL,  // 2
+	BELL_LOWVOLT, // 3
+	BELL_CHARGING // 4
+} SpeakerState;
 
 typedef struct
 {
@@ -33,8 +34,7 @@ typedef struct
 
 
 //Prototypes
-void Bell_Init(void);
+void Bell_Init();
 void Horn_Enable(uint8_t Enable);
-uint8_t Horn_Update(void);
-uint8_t Bell_LowVolt(void);
+uint8_t Bell_Update(SpeakerState speaker_state);
 

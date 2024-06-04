@@ -121,7 +121,7 @@ void LowVoltKill_update(void)
 			//Ring Bell for end of cycle
 			case LOW_VOLT_STATE_CHECK_BELL:
 			{
-				if(Horn_Update())
+				if(Bell_Update(BELL))
 				{
 					if(SwitchHornGetStatus())
 					{
@@ -136,7 +136,7 @@ void LowVoltKill_update(void)
 						//Horn_Enable(HORN_OFF);
 						//LED_Green(0);
 						//Horn_Enable(HORN_ON);
-						Bell_LowVolt();
+						Bell_Update(BELL_LOWVOLT);
 						LowVoltkillTimer_mS = LOW_VOLT_LOW_BATT_BEEP;
 						LowVoltState = LOW_VOLT_STATE_END_BEEP;
 					}
@@ -221,7 +221,7 @@ void LowVoltKill_update(void)
 				{
 					LowVoltkillTimer_mS = LOW_VOLT_TIME_WAIT_LOW_BATT_BEEP;
 					LowVoltState = LOW_VOLT_STATE_CHECK_BELL;
-					Horn_Enable(HORN_BELL);
+					Horn_Enable(BELL);
 
 				}
 				break;
@@ -240,7 +240,7 @@ void LowVoltKill_update(void)
 				{
 					Horn_Enable(HORN_OFF);
 					LED_Green(0);
-					Bell_LowVolt();
+					Bell_Update(BELL_LOWVOLT);
 
 				}
 			}
