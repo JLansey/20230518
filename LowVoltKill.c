@@ -30,6 +30,8 @@ uint16_t BellDebounceTimer_mS;
 // will be false if it was turned on by plugging it into the charger
 uint8_t ButtonTurnedOn = 0; 
 
+SpeakerState BellState;
+
 //*--------------------------------------------------------------------------------------
 //* Function Name       : LowVoltKill_init()
 //* Object              : initialize the AC and DAC for fast shutdown
@@ -95,6 +97,7 @@ void LowVoltKill_update(void)
 				DAC0.DATA = LOW_VOLT_KILL_DAC_CNT;
 				LowVoltkillTimer_mS = LOW_VOLT_KILL_TIMEOUT;
 				BellDebounceTimer_mS = BELL_DEBOUNCE_T;
+				BellState = BELL;
 
 				LowVoltDetectCount = 0;
 				LowVoltDetected = 0;
@@ -135,7 +138,8 @@ void LowVoltKill_update(void)
 			//Ring Bell for end of cycle
 			case LOW_VOLT_STATE_CHECK_BELL:
 			{
-				if(Bell_Update(BELL))
+
+				if(Bell_Update(BellState))
 				{
 					if(SwitchHornGetStatus())
 					{
@@ -258,14 +262,19 @@ void LowVoltKill_update(void)
 					
 					LowVoltState = LOW_VOLT_STATE_CHECK_HORN1;
 				}
-			
-				if(LowVoltkillTimer_mS == 0)
-				{
-					Horn_Enable(HORN_OFF);
-					//LED_Green(0);
-					Bell_Update(BELL_LOWVOLT);
+				else{
+					//Bell_Update(BELL_LOWVOLT);
+					if(LowVoltkillTimer_mS == 0)
+					{
+						//Horn_Enable(HORN_OFF);
+						LED_Green(1);
+						Bell_Update(BELL_LOWVOLT);
 
+					}
 				}
+			
+
+				break;
 			}
 
 			//Just stay here with RED LED on.  Battery is dead

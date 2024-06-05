@@ -40,7 +40,6 @@ FUSES = {
 };
 
 uint8_t LowSpeed;
-bool charging_flag;
 
 
 int main(void)
@@ -57,7 +56,6 @@ int main(void)
 	LowVoltKill_init();
 	
 	LowSpeed = 0;
-//	charging_flag = false;
 	
 	// Enable interrupts
 	sei();
@@ -83,17 +81,10 @@ int main(void)
 			if(!(CHARGER_STATUS_PORT.IN & CHARGER_STATUS_BIT))
 			{
 				LED_Red(1);
-				//if (!charging_flag) {
-				Bell_Update(BELL_CHARGING);
-				//LowVoltKill_update();
-				//LED_Green(1);
-				//}
-				charging_flag = true;
 			}
 			else
 			{
 				LED_Red(0);
-				charging_flag = false;
 			}
 		}
 
