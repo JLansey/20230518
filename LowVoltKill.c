@@ -28,7 +28,7 @@ uint16_t BellDebounceTimer_mS;
 
 // will be true if the switch was depressed when the horn was turned on
 // will be false if it was turned on by plugging it into the charger
-uint8_t ButtonTurnedOn = 0; 
+// uint8_t ButtonTurnedOn = 0; 
 
 SpeakerState BellState;
 
@@ -95,7 +95,7 @@ void LowVoltKill_update(void)
 			case LOW_VOLT_STATE_INIT:
 			{
 				DAC0.DATA = LOW_VOLT_KILL_DAC_CNT;
-				LowVoltkillTimer_mS = LOW_VOLT_KILL_TIMEOUT;
+				LowVoltkillTimer_mS = LOW_VOLT_KILL_TIMEOUT; // 10
 				BellDebounceTimer_mS = BELL_DEBOUNCE_T;
 				BellState = BELL;
 
@@ -116,16 +116,17 @@ void LowVoltKill_update(void)
 
 				if(LowVoltkillTimer_mS == 0)
 				{
+					
 					DAC0.DATA = LOW_VOLT_LOW_BATT_DAC_CNT;
 					LowVoltkillTimer_mS = LOW_VOLT_TIME_MAX_HORN_ON_TIME;
 					if(SwitchHornGetStatus())
 					{
-						ButtonTurnedOn = 1;
+						// ButtonTurnedOn = 1;
 						LowVoltState = LOW_VOLT_STATE_CHECK_HORN1;
 					}
 					else
 					{
-						ButtonTurnedOn = 0;
+						// ButtonTurnedOn = 0;
 						LowVoltState = LOW_VOLT_STATE_CHECK_HORN0;
 					}
 				}
@@ -145,6 +146,7 @@ void LowVoltKill_update(void)
 					{
 						LowVoltkillTimer_mS = LOW_VOLT_TIME_MAX_HORN_ON_TIME;
 						BellDebounceTimer_mS = BELL_DEBOUNCE_T;
+						BellState = BELL;
 
 						LowVoltState = LOW_VOLT_STATE_CHECK_HORN1;
 					}
@@ -154,7 +156,7 @@ void LowVoltKill_update(void)
 						//Horn_Enable(HORN_OFF);
 						//LED_Green(0);
 						//Horn_Enable(HORN_ON);
-						Bell_Update(BELL_LOWVOLT);
+						//Bell_Update(BellState);
 						LowVoltkillTimer_mS = LOW_VOLT_LOW_BATT_BEEP;
 						LowVoltState = LOW_VOLT_STATE_END_BEEP;
 					}
@@ -181,13 +183,13 @@ void LowVoltKill_update(void)
 				{
 					LowVoltkillTimer_mS = LOW_VOLT_TIME_MAX_HORN_ON_TIME;
 					BellDebounceTimer_mS = BELL_DEBOUNCE_T;
+					BellState = BELL;
 					// go on to the next state where it will maybe honk
 					LowVoltState = LOW_VOLT_STATE_CHECK_HORN1;
 				}
-				
 				else if(LowVoltkillTimer_mS == 0 && LowVoltDetected)
 				{
-					Horn_Enable(HORN_ON);
+					//Horn_Enable(HORN_ON);
 					LED_Green(1);
 
 					LowVoltkillTimer_mS = LOW_VOLT_LOW_BATT_BEEP;
@@ -239,14 +241,15 @@ void LowVoltKill_update(void)
 				{
 					LowVoltkillTimer_mS = LOW_VOLT_TIME_WAIT_LOW_BATT_BEEP;
 					LowVoltState = LOW_VOLT_STATE_CHECK_BELL;
-					if (ButtonTurnedOn)
-					{
-						Horn_Enable(BELL);
-					}
-					else
-					{
-						Horn_Enable(BELL_CHARGING);
-					}
+					// if (ButtonTurnedOn)
+					// {
+						// Horn_Enable(BELL);
+					// }
+					// else
+					// {
+						BellState = BELL;
+						Horn_Enable(BellState);
+					// }
 
 				}
 				break;
@@ -255,10 +258,15 @@ void LowVoltKill_update(void)
 			//Beep horn to indicate battery low.  Go back to LOW_VOLT_STATE_BATT_LOW state if horn switch pressed again
 			case LOW_VOLT_STATE_END_BEEP:
 			{
+				LED_Green(1);
+
+
 				if(SwitchHornGetStatus())
 				{
 					LowVoltkillTimer_mS = LOW_VOLT_TIME_MAX_HORN_ON_TIME;
 					BellDebounceTimer_mS = BELL_DEBOUNCE_T;
+
+					BellState = BELL;
 					
 					LowVoltState = LOW_VOLT_STATE_CHECK_HORN1;
 				}
@@ -266,9 +274,10 @@ void LowVoltKill_update(void)
 					//Bell_Update(BELL_LOWVOLT);
 					if(LowVoltkillTimer_mS == 0)
 					{
-						//Horn_Enable(HORN_OFF);
-						LED_Green(1);
-						Bell_Update(BELL_LOWVOLT);
+						Horn_Enable(HORN_OFF);
+						// LED_Green(1);
+						// BellState = BELL_LOWVOLT;
+						// Horn_Enable(BellState);
 
 					}
 				}
