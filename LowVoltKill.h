@@ -19,7 +19,7 @@
 #define LOW_VOLT_LOW_BATT_BEEP				2000  // length of time it is honking for
 #define LOW_VOLT_TIME_MAX_HORN_ON_TIME		10000 // how long you can honk the horn for before it turns off
 // amount of time to decide if you mean to honk, or only mean to ring the bell
-#define BELL_DEBOUNCE_T 120 // change to 400 for quieter debugging
+#define BELL_DEBOUNCE_T 100 // change to 400 for quieter debugging
 
 
 typedef enum {

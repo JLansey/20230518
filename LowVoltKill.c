@@ -125,9 +125,9 @@ void LowVoltKill_update(void)
 						LowVoltState = LOW_VOLT_STATE_CHECK_HORN1;
 					}
 					else
-					{
+					{ // pretend like horn was pressed no matter what 
 						// ButtonTurnedOn = 0;
-						LowVoltState = LOW_VOLT_STATE_CHECK_HORN0;
+						LowVoltState = LOW_VOLT_STATE_CHECK_HORN1;
 					}
 				}
 				
