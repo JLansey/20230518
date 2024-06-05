@@ -271,7 +271,7 @@ void LowVoltKill_update(void)
 					LowVoltState = LOW_VOLT_STATE_CHECK_HORN1;
 				}
 				else{
-					//Bell_Update(BELL_LOWVOLT);
+					Bell_Update(BELL_LOWVOLT);
 					if(LowVoltkillTimer_mS == 0)
 					{
 						Horn_Enable(HORN_OFF);
@@ -281,8 +281,8 @@ void LowVoltKill_update(void)
 
 					}
 				}
-			
 
+				// Bell_Update(BELL_LOWVOLT);
 				break;
 			}
 
