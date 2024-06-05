@@ -67,8 +67,8 @@ PWMSetting pwm_charging[] =
 PWMSetting pwm_lowvolt[] =
 {
 	// First part (unchanged)
-    {160, 1700,       50},
-    {160, 1700,       50},
+    {160, 1300,       50},
+    {160, 1300,       50},
     {160, 1250,       40},
     {160, 1250,       40},
     {60, 1200,       30},

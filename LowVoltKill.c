@@ -147,26 +147,24 @@ void LowVoltKill_update(void)
 						LowVoltkillTimer_mS = LOW_VOLT_TIME_MAX_HORN_ON_TIME;
 						BellDebounceTimer_mS = BELL_DEBOUNCE_T;
 						BellState = BELL;
+						LED_Green(1);
+
 
 						LowVoltState = LOW_VOLT_STATE_CHECK_HORN1;
 					}
 				
 					else if(LowVoltkillTimer_mS == 0 && LowVoltDetected)
 					{
-						//Horn_Enable(HORN_OFF);
-						//LED_Green(0);
-						//Horn_Enable(HORN_ON);
-						//Bell_Update(BellState);
-						// Horn_Enable(BELL_LOWVOLT);
+
 						Bell_Init();
+						LED_Green(0);
+
 						LowVoltkillTimer_mS = LOW_VOLT_LOW_BATT_BEEP;
 						LowVoltState = LOW_VOLT_STATE_END_BEEP;
 					}
 				}
 				else
 				{
-					//Horn_Enable(HORN_OFF);
-					//LED_Green(0);
 					LowVoltkillTimer_mS = LOW_VOLT_TIME_WAIT_LOW_BATT_BEEP;
 					LowVoltState = LOW_VOLT_STATE_CHECK_HORN0;
 				}
@@ -179,10 +177,11 @@ void LowVoltKill_update(void)
 			{
 
 				Horn_Enable(HORN_OFF);
-				//LED_Green(0);
+
 
 				if(SwitchHornGetStatus())
 				{
+					LED_Green(1);
 					LowVoltkillTimer_mS = LOW_VOLT_TIME_MAX_HORN_ON_TIME;
 					BellDebounceTimer_mS = BELL_DEBOUNCE_T;
 					BellState = BELL;
@@ -191,9 +190,7 @@ void LowVoltKill_update(void)
 				}
 				else if(LowVoltkillTimer_mS == 0 && LowVoltDetected)
 				{
-					//Horn_Enable(HORN_ON);
-					LED_Green(1);
-
+					LED_Green(0);
 					LowVoltkillTimer_mS = LOW_VOLT_LOW_BATT_BEEP;
 					LowVoltState = LOW_VOLT_STATE_END_BEEP;
 				}
@@ -241,6 +238,8 @@ void LowVoltKill_update(void)
 				}
 				else
 				{
+					LED_Green(0);
+
 					LowVoltkillTimer_mS = LOW_VOLT_TIME_WAIT_LOW_BATT_BEEP;
 					LowVoltState = LOW_VOLT_STATE_CHECK_BELL;
 					// if (ButtonTurnedOn)
@@ -269,19 +268,19 @@ void LowVoltKill_update(void)
 					BellDebounceTimer_mS = BELL_DEBOUNCE_T;
 
 					BellState = BELL;
+					LED_Green(1);
+
 					
 					LowVoltState = LOW_VOLT_STATE_CHECK_HORN1;
 				}
 				else{
+					LED_Green(0);
 
 					Bell_Update(BELL_LOWVOLT);
 
 					if(LowVoltkillTimer_mS == 0)
 					{
 						Horn_Enable(HORN_OFF);
-						// LED_Green(1);
-						// BellState = BELL_LOWVOLT;
-						// Horn_Enable(BellState);
 
 					}
 				}
