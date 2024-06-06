@@ -76,16 +76,19 @@ int main(void)
 			}
 
 			Horn_Enable(HORN_OFF);
-			LED_Green(1);
 
 			//LED_update();
 			if(!(CHARGER_STATUS_PORT.IN & CHARGER_STATUS_BIT))
 			{
 				LED_Red(1);
+				LED_Green(0);
+
 			}
 			else
 			{
 				LED_Red(0);
+				LED_Green(1);
+
 			}
 		}
 
