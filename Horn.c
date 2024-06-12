@@ -12,8 +12,11 @@
 #include "Horn.h"
 #include "Timer.h"
 
-#define KEY_FREQ 2000
-#define FREQ_ALTERNATE 2010
+#define KEY_FREQ 1800
+#define FREQ_ALTERNATE 1810
+
+// #define KEY_FREQ 1900
+// #define FREQ_ALTERNATE 1910
 
 // Create a table of PWM settings
 PWMSetting pwm_bell[] =
