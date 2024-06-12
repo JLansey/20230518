@@ -99,11 +99,12 @@ int main(void)
 			{
  				_PROTECTED_WRITE(CLKCTRL.MCLKCTRLB, CLKCTRL_PEN_bm | (0 << CLKCTRL_PDIV0_bp));
  				_PROTECTED_WRITE(CLKCTRL.MCLKCTRLA, CLKCTRL_CLKSEL_OSC20M_gc);
+				LED_Green(0);
+
 				LowSpeed = 0;
 			}
 
 			//LED_update();
-			//LED_Green(0);
 			LowVoltKill_update();
 		}
 	}

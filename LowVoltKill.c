@@ -31,6 +31,7 @@ uint16_t BellDebounceTimer_mS;
 // uint8_t ButtonTurnedOn = 0; 
 
 SpeakerState BellState;
+uint8_t StartedByButton;
 
 //*--------------------------------------------------------------------------------------
 //* Function Name       : LowVoltKill_init()
@@ -103,6 +104,17 @@ void LowVoltKill_update(void)
 				LowVoltDetected = 0;
 
 				LowVoltState = LOW_VOLT_STATE_KILL;
+
+				// StartedByButton = SwitchHornGetStatus();
+				if (SwitchHornGetStatus())
+				{
+					BellState = BELL;
+				}
+				else
+				{
+					BellState = BELL_CHARGING;
+				}
+
 				break;
 			}
 
