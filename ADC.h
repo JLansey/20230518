@@ -8,8 +8,8 @@
 **
 ******************************************************************************************/
 
-#ifndef _ADC_H_
-#define _ADC_H_
+#ifndef ADC_H
+#define ADC_H
 
 //#defines for Analog Inputs
 #define ADC_CHAN_EXT_IN			3
@@ -52,4 +52,4 @@ void ADC_Init(void);
 void ADC_Update(void);
 int ADC_ReadPin(uint8_t ain);
 
-#endif /* _ADC_H_ */
+#endif /* ADC_H */
