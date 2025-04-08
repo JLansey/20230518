@@ -205,6 +205,10 @@ void LowVoltKill_update(void)
 					{
 						LED_Green(0);
 						LowVoltkillTimer_mS = LOW_VOLT_LOW_BATT_BEEP;
+						
+						// For both modes, we properly initialize the low battery bell
+						Horn_Enable(BELL_LOWVOLT);
+						
 						LowVoltState = LOW_VOLT_STATE_END_BEEP;
 					}
 					else
@@ -240,6 +244,10 @@ void LowVoltKill_update(void)
 				{
 					LED_Green(0);
 					LowVoltkillTimer_mS = LOW_VOLT_LOW_BATT_BEEP;
+					
+					// For both modes, we properly initialize the low battery bell
+					Horn_Enable(BELL_LOWVOLT);
+					
 					LowVoltState = LOW_VOLT_STATE_END_BEEP;
 				}
 
@@ -312,23 +320,22 @@ void LowVoltKill_update(void)
 					
 					LowVoltState = LOW_VOLT_STATE_CHECK_HORN1;
 				}
-				else{
+				else
+				{
 					LED_Green(0);
 
-					#if CONFIG_MODE == CONFIG_MODE_MINIBELL
-					Bell_Update(BELL_LOWVOLT);
-					#else
-					// For Mini mode, we'll just do quick beeps
-					if(LowVoltkillTimer_mS % 500 == 0) // Every 500ms
+					// Both config modes use the same Bell_Update for low battery
+					if(Bell_Update(BELL_LOWVOLT) == 0)
 					{
-						Horn_Enable(HORN_ON);
-						MiniHonkTimer_mS = MINI_HONK_EXTENSION_TIME;
-					}
-					#endif
-
-					if(LowVoltkillTimer_mS == 0)
-					{
+						// If the Bell_Update returns 0, the sequence is done
+						// Make sure to turn the horn off completely
 						Horn_Enable(HORN_OFF);
+						
+						// Reset timer to prevent any further action
+						if(LowVoltkillTimer_mS != 0)
+						{
+							LowVoltkillTimer_mS = 0;
+						}
 					}
 				}
 				break;
