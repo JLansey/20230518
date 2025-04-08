@@ -24,13 +24,14 @@ uint16_t LowVoltkillTimer_mS;
 uint16_t LowVoltkillOldTick;
 uint8_t LowVoltState;
 
-#define LOW_VOLT_STATE_INIT			0
-#define LOW_VOLT_STATE_KILL			1
-#define LOW_VOLT_STATE_CHECK_HORN0	2
-#define LOW_VOLT_STATE_CHECK_HORN1	3
-#define LOW_VOLT_STATE_END_BEEP		4
-#define LOW_VOLT_STATE_DEAD			5
+uint16_t BellDebounceTimer_mS;
 
+// will be true if the switch was depressed when the horn was turned on
+// will be false if it was turned on by plugging it into the charger
+// uint8_t ButtonTurnedOn = 0; 
+
+SpeakerState BellState;
+uint8_t StartedByButton;
 
 //*--------------------------------------------------------------------------------------
 //* Function Name       : LowVoltKill_init()
@@ -52,7 +53,7 @@ void LowVoltKill_init(void)
 	//Setup DAC
 	DAC0.CTRLA = DAC_OUTEN_bm | DAC_ENABLE_bm;
 	VREF.CTRLA = VREF_DAC0REFSEL_1V1_gc | VREF_ADC0REFSEL_1V1_gc;
-	DAC0.DATA = LOW_VOLT_KILL_DAC_CNT; // dac on one side, battery on the other
+	DAC0.DATA = LOW_VOLT_KILL_DAC_CNT;
    
 	//Setup AC
 	AC0.MUXCTRLA = AC_MUXPOS_PIN0_gc | AC_MUXNEG_DAC_gc | (0 << AC_INVERT_bp);
@@ -80,50 +81,128 @@ void LowVoltKill_update(void)
 			LowVoltkillTimer_mS--;
 		}
 
+		// see if you have been holding the button down long enough to honk or not
+		if(BellDebounceTimer_mS)
+		{
+			BellDebounceTimer_mS--;
+			LED_Red(1);
+		}
+		else{
+			LED_Red(0);
+		}
+
 		switch (LowVoltState)
 		{
 			case LOW_VOLT_STATE_INIT:
 			{
 				DAC0.DATA = LOW_VOLT_KILL_DAC_CNT;
-				LowVoltkillTimer_mS = LOW_VOLT_KILL_TIMEOUT;
+				LowVoltkillTimer_mS = LOW_VOLT_KILL_TIMEOUT; // 10
+				BellDebounceTimer_mS = BELL_DEBOUNCE_T;
+				BellState = BELL;
+
 				LowVoltDetectCount = 0;
 				LowVoltDetected = 0;
 
 				LowVoltState = LOW_VOLT_STATE_KILL;
+
+				// StartedByButton = SwitchHornGetStatus();
+				if (SwitchHornGetStatus())
+				{
+					BellState = BELL;
+				}
+				else
+				{
+					BellState = BELL_CHARGING;
+				}
+
 				break;
 			}
 
 			//if battery already low without honking horn.  Just shut down with Red LED on
 			case LOW_VOLT_STATE_KILL:
 			{
-				if(!(AC0.STATUS & AC_STATE_bm)) // AC0.STATUS - the analog comparitor to compare voltages
+				if(!(AC0.STATUS & AC_STATE_bm))
 				{
 					LowVoltState = LOW_VOLT_STATE_DEAD;
 				}
 
 				if(LowVoltkillTimer_mS == 0)
 				{
+					
 					DAC0.DATA = LOW_VOLT_LOW_BATT_DAC_CNT;
 					LowVoltkillTimer_mS = LOW_VOLT_TIME_MAX_HORN_ON_TIME;
-					LowVoltState = LOW_VOLT_STATE_CHECK_HORN1;
+					if(SwitchHornGetStatus())
+					{
+						// ButtonTurnedOn = 1;
+						LowVoltState = LOW_VOLT_STATE_CHECK_HORN1;
+					}
+					else
+					{ // pretend like horn was pressed no matter what 
+						// ButtonTurnedOn = 0;
+						LowVoltState = LOW_VOLT_STATE_CHECK_HORN1;
+					}
 				}
+				
+				//ButtonTurnedOn = SwitchHornGetStatus();
+				break;
+			}
+			
+			
+			//Ring Bell for end of cycle
+			case LOW_VOLT_STATE_CHECK_BELL:
+			{
+
+				if(Bell_Update(BellState))
+				{
+					if(SwitchHornGetStatus())
+					{
+						LowVoltkillTimer_mS = LOW_VOLT_TIME_MAX_HORN_ON_TIME;
+						BellDebounceTimer_mS = BELL_DEBOUNCE_T;
+						BellState = BELL;
+						LED_Green(1);
+
+
+						LowVoltState = LOW_VOLT_STATE_CHECK_HORN1;
+					}
+				
+					else if(LowVoltkillTimer_mS == 0 && LowVoltDetected)
+					{
+
+						Bell_Init();
+						LED_Green(0);
+
+						LowVoltkillTimer_mS = LOW_VOLT_LOW_BATT_BEEP;
+						LowVoltState = LOW_VOLT_STATE_END_BEEP;
+					}
+				}
+				else
+				{
+					LowVoltkillTimer_mS = LOW_VOLT_TIME_WAIT_LOW_BATT_BEEP;
+					LowVoltState = LOW_VOLT_STATE_CHECK_HORN0;
+				}
+
 				break;
 			}
 
 			//Horn switch detected not pressed.  wait here until horn pressed again, or power dies
 			case LOW_VOLT_STATE_CHECK_HORN0:
 			{
-				Horn_Enable(0);
+
+				Horn_Enable(HORN_OFF);
+
 
 				if(SwitchHornGetStatus())
 				{
+					LED_Green(1);
 					LowVoltkillTimer_mS = LOW_VOLT_TIME_MAX_HORN_ON_TIME;
+					BellDebounceTimer_mS = BELL_DEBOUNCE_T;
+					BellState = BELL;
+					// go on to the next state where it will maybe honk
 					LowVoltState = LOW_VOLT_STATE_CHECK_HORN1;
 				}
-				
 				else if(LowVoltkillTimer_mS == 0 && LowVoltDetected)
 				{
-					Horn_Enable(1);
+					LED_Green(0);
 					LowVoltkillTimer_mS = LOW_VOLT_LOW_BATT_BEEP;
 					LowVoltState = LOW_VOLT_STATE_END_BEEP;
 				}
@@ -134,9 +213,16 @@ void LowVoltKill_update(void)
 			//Horn Switch detected pressed.  Honk Horn and check battery level.  If detected low for period of time go to LOW_VOLT_STATE_BATT_LOW state
 			case LOW_VOLT_STATE_CHECK_HORN1:
 			{
+				//check the switch is still pressed
 				if(SwitchHornGetStatus())
 				{
-					Horn_Enable(1);
+
+					// if you are commited to honk
+					if (BellDebounceTimer_mS == 0){
+						Horn_Enable(HORN_ON);
+						LED_Green(1);
+
+					}
 
 					//stop honking horn if max on time expired
 					if(LowVoltkillTimer_mS  == 0)
@@ -164,8 +250,20 @@ void LowVoltKill_update(void)
 				}
 				else
 				{
+					LED_Green(0);
+
 					LowVoltkillTimer_mS = LOW_VOLT_TIME_WAIT_LOW_BATT_BEEP;
-					LowVoltState = LOW_VOLT_STATE_CHECK_HORN0;
+					LowVoltState = LOW_VOLT_STATE_CHECK_BELL;
+					// if (ButtonTurnedOn)
+					// {
+						// Horn_Enable(BELL);
+					// }
+					// else
+					// {
+						BellState = BELL;
+						Horn_Enable(BellState);
+					// }
+
 				}
 				break;
 			}
@@ -173,16 +271,34 @@ void LowVoltKill_update(void)
 			//Beep horn to indicate battery low.  Go back to LOW_VOLT_STATE_BATT_LOW state if horn switch pressed again
 			case LOW_VOLT_STATE_END_BEEP:
 			{
+				LED_Green(1);
+
+
 				if(SwitchHornGetStatus())
 				{
 					LowVoltkillTimer_mS = LOW_VOLT_TIME_MAX_HORN_ON_TIME;
+					BellDebounceTimer_mS = BELL_DEBOUNCE_T;
+
+					BellState = BELL;
+					LED_Green(1);
+
+					
 					LowVoltState = LOW_VOLT_STATE_CHECK_HORN1;
 				}
-			
-				if(LowVoltkillTimer_mS == 0)
-				{
-					Horn_Enable(0);
+				else{
+					LED_Green(0);
+
+					Bell_Update(BELL_LOWVOLT);
+
+					if(LowVoltkillTimer_mS == 0)
+					{
+						Horn_Enable(HORN_OFF);
+
+					}
 				}
+
+				// Bell_Update(BELL_LOWVOLT);
+				break;
 			}
 
 			//Just stay here with RED LED on.  Battery is dead
