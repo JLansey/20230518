@@ -22,6 +22,7 @@
 #include "Charger.h"
 #include "Horn.h"
 #include "LowVoltKill.h"
+#include "Config.h"
 
 #define BOOTEND_FUSE               (0x00)
 
@@ -52,7 +53,7 @@ int main(void)
 	LED_init();
 	SwitchInit();
 	Charger_init();
-	// Bell_Init();
+	// Bell_Init(); // This is now handled in LowVoltKill_init() as needed
 	LowVoltKill_init();
 	
 	LowSpeed = 0;

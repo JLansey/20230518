@@ -9,6 +9,9 @@
 **
 ******************************************************************************************/
 
+#ifndef LOWVOLTKILL_H
+#define LOWVOLTKILL_H
+
 
 //Timing Defines
 #define LOW_VOLT_KILL_DAC_CNT				0x24	
@@ -47,3 +50,8 @@ typedef enum {
 //Prototypes
 void LowVoltKill_init(void);
 void LowVoltKill_update(void);
+
+// External variable declarations
+extern uint16_t MiniHonkTimer_mS;
+
+#endif /* LOWVOLTKILL_H */

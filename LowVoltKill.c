@@ -17,6 +17,7 @@
 #include "Switch.h"
 #include "Horn.h"
 #include "Led.h"
+#include "Config.h"
 
 uint16_t LowVoltDetectCount;
 uint8_t LowVoltDetected;
@@ -25,10 +26,7 @@ uint16_t LowVoltkillOldTick;
 uint8_t LowVoltState;
 
 uint16_t BellDebounceTimer_mS;
-
-// will be true if the switch was depressed when the horn was turned on
-// will be false if it was turned on by plugging it into the charger
-// uint8_t ButtonTurnedOn = 0; 
+uint16_t MiniHonkTimer_mS;
 
 SpeakerState BellState;
 uint8_t StartedByButton;
@@ -60,6 +58,7 @@ void LowVoltKill_init(void)
 	AC0.CTRLA = AC_RUNSTDBY_bm| AC_ENABLE_bm | AC_INTMODE_POSEDGE_gc;
 	
 	LowVoltState = LOW_VOLT_STATE_INIT;
+	MiniHonkTimer_mS = 0;
 }
 
 
@@ -90,6 +89,16 @@ void LowVoltKill_update(void)
 		else{
 			LED_Red(0);
 		}
+		
+		// Mini honk extension timer
+		if(MiniHonkTimer_mS)
+		{
+			MiniHonkTimer_mS--;
+			if(MiniHonkTimer_mS == 0)
+			{
+				Horn_Enable(HORN_OFF);
+			}
+		}
 
 		switch (LowVoltState)
 		{
@@ -99,13 +108,13 @@ void LowVoltKill_update(void)
 				LowVoltkillTimer_mS = LOW_VOLT_KILL_TIMEOUT; // 10
 				BellDebounceTimer_mS = BELL_DEBOUNCE_T;
 				BellState = BELL;
+				MiniHonkTimer_mS = 0;
 
 				LowVoltDetectCount = 0;
 				LowVoltDetected = 0;
 
 				LowVoltState = LOW_VOLT_STATE_KILL;
 
-				// StartedByButton = SwitchHornGetStatus();
 				if (SwitchHornGetStatus())
 				{
 					BellState = BELL;
@@ -133,25 +142,23 @@ void LowVoltKill_update(void)
 					LowVoltkillTimer_mS = LOW_VOLT_TIME_MAX_HORN_ON_TIME;
 					if(SwitchHornGetStatus())
 					{
-						// ButtonTurnedOn = 1;
 						LowVoltState = LOW_VOLT_STATE_CHECK_HORN1;
 					}
 					else
 					{ // pretend like horn was pressed no matter what 
-						// ButtonTurnedOn = 0;
 						LowVoltState = LOW_VOLT_STATE_CHECK_HORN1;
 					}
 				}
 				
-				//ButtonTurnedOn = SwitchHornGetStatus();
 				break;
 			}
 			
 			
-			//Ring Bell for end of cycle
+			//Ring Bell for end of cycle or do mini honk extension
 			case LOW_VOLT_STATE_CHECK_BELL:
 			{
-
+				#if CONFIG_MODE == CONFIG_MODE_MINIBELL
+				// Original bell behavior
 				if(Bell_Update(BellState))
 				{
 					if(SwitchHornGetStatus())
@@ -161,13 +168,11 @@ void LowVoltKill_update(void)
 						BellState = BELL;
 						LED_Green(1);
 
-
 						LowVoltState = LOW_VOLT_STATE_CHECK_HORN1;
 					}
 				
 					else if(LowVoltkillTimer_mS == 0 && LowVoltDetected)
 					{
-
 						Bell_Init();
 						LED_Green(0);
 
@@ -180,6 +185,39 @@ void LowVoltKill_update(void)
 					LowVoltkillTimer_mS = LOW_VOLT_TIME_WAIT_LOW_BATT_BEEP;
 					LowVoltState = LOW_VOLT_STATE_CHECK_HORN0;
 				}
+				#else
+				// Mini mode - short honk extension instead of bell
+				if(MiniHonkTimer_mS == 0)
+				{
+					// Do a short honk extension
+					Horn_Enable(HORN_ON);
+					MiniHonkTimer_mS = MINI_HONK_EXTENSION_TIME;
+					
+					if(SwitchHornGetStatus())
+					{
+						LowVoltkillTimer_mS = LOW_VOLT_TIME_MAX_HORN_ON_TIME;
+						BellDebounceTimer_mS = BELL_DEBOUNCE_T;
+						LED_Green(1);
+
+						LowVoltState = LOW_VOLT_STATE_CHECK_HORN1;
+					}
+					else if(LowVoltkillTimer_mS == 0 && LowVoltDetected)
+					{
+						LED_Green(0);
+						LowVoltkillTimer_mS = LOW_VOLT_LOW_BATT_BEEP;
+						
+						// For both modes, we properly initialize the low battery bell
+						Horn_Enable(BELL_LOWVOLT);
+						
+						LowVoltState = LOW_VOLT_STATE_END_BEEP;
+					}
+					else
+					{
+						LowVoltkillTimer_mS = LOW_VOLT_TIME_WAIT_LOW_BATT_BEEP;
+						LowVoltState = LOW_VOLT_STATE_CHECK_HORN0;
+					}
+				}
+				#endif
 
 				break;
 			}
@@ -187,9 +225,11 @@ void LowVoltKill_update(void)
 			//Horn switch detected not pressed.  wait here until horn pressed again, or power dies
 			case LOW_VOLT_STATE_CHECK_HORN0:
 			{
-
-				Horn_Enable(HORN_OFF);
-
+				// Only turn off horn if mini honk timer is not active
+				if(MiniHonkTimer_mS == 0)
+				{
+					Horn_Enable(HORN_OFF);
+				}
 
 				if(SwitchHornGetStatus())
 				{
@@ -204,6 +244,10 @@ void LowVoltKill_update(void)
 				{
 					LED_Green(0);
 					LowVoltkillTimer_mS = LOW_VOLT_LOW_BATT_BEEP;
+					
+					// For both modes, we properly initialize the low battery bell
+					Horn_Enable(BELL_LOWVOLT);
+					
 					LowVoltState = LOW_VOLT_STATE_END_BEEP;
 				}
 
@@ -216,16 +260,14 @@ void LowVoltKill_update(void)
 				//check the switch is still pressed
 				if(SwitchHornGetStatus())
 				{
-
 					// if you are commited to honk
 					if (BellDebounceTimer_mS == 0){
 						Horn_Enable(HORN_ON);
 						LED_Green(1);
-
 					}
 
 					//stop honking horn if max on time expired
-					if(LowVoltkillTimer_mS  == 0)
+					if(LowVoltkillTimer_mS == 0)
 					{
 						SwitchClearHornStatus();
 					}
@@ -254,16 +296,11 @@ void LowVoltKill_update(void)
 
 					LowVoltkillTimer_mS = LOW_VOLT_TIME_WAIT_LOW_BATT_BEEP;
 					LowVoltState = LOW_VOLT_STATE_CHECK_BELL;
-					// if (ButtonTurnedOn)
-					// {
-						// Horn_Enable(BELL);
-					// }
-					// else
-					// {
-						BellState = BELL;
-						Horn_Enable(BellState);
-					// }
-
+					
+					#if CONFIG_MODE == CONFIG_MODE_MINIBELL
+					BellState = BELL;
+					Horn_Enable(BellState);
+					#endif
 				}
 				break;
 			}
@@ -273,7 +310,6 @@ void LowVoltKill_update(void)
 			{
 				LED_Green(1);
 
-
 				if(SwitchHornGetStatus())
 				{
 					LowVoltkillTimer_mS = LOW_VOLT_TIME_MAX_HORN_ON_TIME;
@@ -281,23 +317,27 @@ void LowVoltKill_update(void)
 
 					BellState = BELL;
 					LED_Green(1);
-
 					
 					LowVoltState = LOW_VOLT_STATE_CHECK_HORN1;
 				}
-				else{
+				else
+				{
 					LED_Green(0);
 
-					Bell_Update(BELL_LOWVOLT);
-
-					if(LowVoltkillTimer_mS == 0)
+					// Both config modes use the same Bell_Update for low battery
+					if(Bell_Update(BELL_LOWVOLT) == 0)
 					{
+						// If the Bell_Update returns 0, the sequence is done
+						// Make sure to turn the horn off completely
 						Horn_Enable(HORN_OFF);
-
+						
+						// Reset timer to prevent any further action
+						if(LowVoltkillTimer_mS != 0)
+						{
+							LowVoltkillTimer_mS = 0;
+						}
 					}
 				}
-
-				// Bell_Update(BELL_LOWVOLT);
 				break;
 			}
 

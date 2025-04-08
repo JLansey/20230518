@@ -8,6 +8,9 @@
 **
 ******************************************************************************************/
 
+#ifndef HORN_H
+#define HORN_H
+
 //defines for charger I/O pins
 #define HORN_PORT		PORTB
 #define HORN_PIN		0
@@ -38,3 +41,4 @@ void Bell_Init();
 void Horn_Enable(uint8_t Enable);
 uint8_t Bell_Update(SpeakerState speaker_state);
 
+#endif /* HORN_H */
