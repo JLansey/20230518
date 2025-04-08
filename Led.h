@@ -8,6 +8,9 @@
 **
 ******************************************************************************************/
 
+#ifndef LED_H
+#define LED_H
+
 //LED timings
 #define TIME_LED_STATUS_HEARTBEAT	250      //time x 1ms
 
@@ -25,3 +28,5 @@ void LED_init(void);
 void LED_Red(uint8_t Enable);
 void LED_Green(uint8_t Enable);
 void LED_update(void);
+
+#endif /* LED_H */

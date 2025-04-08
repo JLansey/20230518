@@ -8,6 +8,9 @@
 **
 ******************************************************************************************/
 
+#ifndef SWITCH_H
+#define SWITCH_H
+
 //timing defines
 #define TIME_SWITCH_PRESS_DET	15	//Time in mS to detect Switch pressed
 #define TIME_SWITCH_RELEASE_DET 15	//Time in mS to detect Switch released
@@ -31,3 +34,5 @@ void SwitchInit (void);
 void SwitchUpdate(void);
 uint8_t SwitchHornGetStatus(void);
 void SwitchClearHornStatus(void);
+
+#endif /* SWITCH_H */

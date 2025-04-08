@@ -8,6 +8,9 @@
 **
 ******************************************************************************************/
 
+#ifndef CHARGER_H
+#define CHARGER_H
+
 //defines for charger I/O pins
 #define CHARGER_PWR_GOOD_PORT	PORTA
 #define CHARGER_PWR_GOOD_PIN	4
@@ -21,3 +24,5 @@
 
 //Prototypes
 void Charger_init(void);
+
+#endif /* CHARGER_H */
