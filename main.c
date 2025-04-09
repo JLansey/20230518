@@ -35,19 +35,18 @@ FUSES = {
 	.TCD0CFG = 0x00,
 	.SYSCFG0 = CRCSRC_NOCRC_gc | RSTPINCFG_UPDI_gc,
 	.SYSCFG1 = SUT_64MS_gc,
-//	.SYSCFG1 = SUT_4MS_gc, // startup time for the processer, how long do you wait
+	//	.SYSCFG1 = SUT_4MS_gc, // startup time for the processer, how long do you wait
 	.APPEND = 0x00,
 	.BOOTEND = BOOTEND_FUSE
 };
 
 uint8_t LowSpeed;
 
-
 int main(void)
 {
 	/* Fix the clock */
- 	_PROTECTED_WRITE(CLKCTRL.MCLKCTRLB, CLKCTRL_PEN_bm | (0 << CLKCTRL_PDIV0_bp));
- 	_PROTECTED_WRITE(CLKCTRL.MCLKCTRLA, CLKCTRL_CLKSEL_OSC20M_gc);
+	_PROTECTED_WRITE(CLKCTRL.MCLKCTRLB, CLKCTRL_PEN_bm | (0 << CLKCTRL_PDIV0_bp));
+	_PROTECTED_WRITE(CLKCTRL.MCLKCTRLA, CLKCTRL_CLKSEL_OSC20M_gc);
 	
 	RTC_init();
 	LED_init();
@@ -78,28 +77,35 @@ int main(void)
 
 			Horn_Enable(HORN_OFF);
 
-			//LED_update();
-			if(!(CHARGER_STATUS_PORT.IN & CHARGER_STATUS_BIT))
+			// Check if button is pressed while charging
+			if(SwitchHornGetStatus())
 			{
-				LED_Red(1);
+				// Button is depressed - turn both LEDs off for visual feedback
+				LED_Red(0);
 				LED_Green(0);
-
 			}
 			else
 			{
-				LED_Red(0);
-				LED_Green(1);
-
+				// Button is not pressed - normal LED state for charging
+				if(!(CHARGER_STATUS_PORT.IN & CHARGER_STATUS_BIT))
+				{
+					LED_Red(1);
+					LED_Green(0);
+				}
+				else
+				{
+					LED_Red(0);
+					LED_Green(1);
+				}
 			}
 		}
-
 		else
 		//Not charging, honk horn unless fault found
 		{
 			if(LowSpeed == 1)
 			{
- 				_PROTECTED_WRITE(CLKCTRL.MCLKCTRLB, CLKCTRL_PEN_bm | (0 << CLKCTRL_PDIV0_bp));
- 				_PROTECTED_WRITE(CLKCTRL.MCLKCTRLA, CLKCTRL_CLKSEL_OSC20M_gc);
+				_PROTECTED_WRITE(CLKCTRL.MCLKCTRLB, CLKCTRL_PEN_bm | (0 << CLKCTRL_PDIV0_bp));
+				_PROTECTED_WRITE(CLKCTRL.MCLKCTRLA, CLKCTRL_CLKSEL_OSC20M_gc);
 				LED_Green(0);
 
 				LowSpeed = 0;
