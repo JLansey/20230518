@@ -26,6 +26,9 @@
 
 #define BOOTEND_FUSE               (0x00)
 
+// Number of milliseconds to hold the button during charging
+#define BUTTON_HOLD_THRESHOLD      5000  // 5 seconds
+
 FUSES = {
 	.WDTCFG = PERIOD_2KCLK_gc | WINDOW_OFF_gc, // brownout detect voltage
 	.BODCFG = ACTIVE_ENABLED_gc | LVL_BODLEVEL7_gc,
@@ -41,6 +44,10 @@ FUSES = {
 };
 
 uint8_t LowSpeed;
+
+// Variables for button hold feature
+uint16_t buttonHoldStartTime = 0;      // When we started holding the button
+uint8_t buttonWasReleased = 1;         // Has the button been released since last hold
 
 int main(void)
 {
@@ -77,23 +84,55 @@ int main(void)
 
 			Horn_Enable(HORN_OFF);
 
+			// Get the current tick
+			uint16_t currentTick = RTC_getTick();
+
 			// Check if button is pressed while charging
 			if(SwitchHornGetStatus())
 			{
-				// Button is depressed - turn both LEDs off for visual feedback
+				// Button is pressed
 				LED_Red(0);
 				LED_Green(0);
+				
+				// If this is a new button press, record the start time
+				if (buttonWasReleased) {
+					buttonHoldStartTime = currentTick;
+					buttonWasReleased = 0;
+				}
+				
+				// Check if button has been held long enough
+				uint16_t holdTime;
+				if (currentTick >= buttonHoldStartTime) {
+					holdTime = currentTick - buttonHoldStartTime;
+					} else {
+					// Handle 16-bit overflow
+					holdTime = (65535 - buttonHoldStartTime) + currentTick + 1;
+				}
+				
+				// If held for threshold time, show confirmation blinks
+				if (holdTime >= BUTTON_HOLD_THRESHOLD) {
+					// Signal activation with quick flashes
+					for (int i = 0; i < 3; i++) {
+						LED_Red(1);
+						RTC_delayMS(100);
+						LED_Red(0);
+						RTC_delayMS(100);
+					}
+					
+					// After flashing, reset hold time to prevent repeated flashing
+					buttonHoldStartTime = currentTick;
+				}
 			}
 			else
 			{
-				// Button is not pressed - normal LED state for charging
-				if(!(CHARGER_STATUS_PORT.IN & CHARGER_STATUS_BIT))
-				{
+				// Button is not pressed - note the release
+				buttonWasReleased = 1;
+				
+				// Normal LED state for charging
+				if(!(CHARGER_STATUS_PORT.IN & CHARGER_STATUS_BIT)) {
 					LED_Red(1);
 					LED_Green(0);
-				}
-				else
-				{
+					} else {
 					LED_Red(0);
 					LED_Green(1);
 				}
@@ -102,6 +141,9 @@ int main(void)
 		else
 		//Not charging, honk horn unless fault found
 		{
+			// Reset the button hold feature variables when not charging
+			buttonWasReleased = 1;
+			
 			if(LowSpeed == 1)
 			{
 				_PROTECTED_WRITE(CLKCTRL.MCLKCTRLB, CLKCTRL_PEN_bm | (0 << CLKCTRL_PDIV0_bp));
