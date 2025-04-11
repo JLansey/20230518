@@ -14,6 +14,7 @@
 #include <stdbool.h>
 #include <util/delay.h>
 #include <avr/wdt.h>
+#include <avr/eeprom.h>
 
 #include "Switch.h"
 //#include "ADC.h"
@@ -28,6 +29,10 @@
 
 // Number of milliseconds to hold the button during charging
 #define BUTTON_HOLD_THRESHOLD      5000  // 5 seconds
+
+// EEPROM configuration
+#define CONFIG_EEPROM_ADDR         0x00
+#define CONFIG_EEPROM_SIG          0xAA
 
 FUSES = {
 	.WDTCFG = PERIOD_2KCLK_gc | WINDOW_OFF_gc, // brownout detect voltage
@@ -45,9 +50,63 @@ FUSES = {
 
 uint8_t LowSpeed;
 
+// Global config_mode variable (this will be used by code added to LowVoltKill.c)
+uint8_t eeprom_config_mode = CONFIG_MODE_MINIBELL;
+
 // Variables for button hold feature
 uint16_t buttonHoldStartTime = 0;      // When we started holding the button
 uint8_t buttonWasReleased = 1;         // Has the button been released since last hold
+
+// Read the configuration from EEPROM
+static void read_config_from_eeprom(void)
+{
+	uint8_t signature = eeprom_read_byte((uint8_t*)CONFIG_EEPROM_ADDR);
+	uint8_t stored_mode = eeprom_read_byte((uint8_t*)(CONFIG_EEPROM_ADDR + 1));
+	
+	// If valid signature and mode, use the stored value
+	if (signature == CONFIG_EEPROM_SIG &&
+	(stored_mode == CONFIG_MODE_MINIBELL || stored_mode == CONFIG_MODE_MINI)) {
+		eeprom_config_mode = stored_mode;
+		} else {
+		// Otherwise use the default mode and save it
+		eeprom_config_mode = CONFIG_MODE_MINIBELL;
+		// Write signature byte
+		eeprom_write_byte((uint8_t*)CONFIG_EEPROM_ADDR, CONFIG_EEPROM_SIG);
+		// Write configuration mode
+		eeprom_write_byte((uint8_t*)(CONFIG_EEPROM_ADDR + 1), eeprom_config_mode);
+	}
+}
+
+// Toggle between configuration modes and provide visual feedback
+static void toggle_config_mode(void)
+{
+	// Toggle the mode
+	eeprom_config_mode = (eeprom_config_mode == CONFIG_MODE_MINIBELL) ?
+	CONFIG_MODE_MINI : CONFIG_MODE_MINIBELL;
+	
+	// Save the new mode to EEPROM
+	eeprom_write_byte((uint8_t*)CONFIG_EEPROM_ADDR, CONFIG_EEPROM_SIG);
+	eeprom_write_byte((uint8_t*)(CONFIG_EEPROM_ADDR + 1), eeprom_config_mode);
+	
+	// Indicate the current mode through LED flashes
+	if (eeprom_config_mode == CONFIG_MODE_MINIBELL) {
+		// Flash green LED to indicate MiniBell mode
+		for (int i = 0; i < 3; i++) {
+			LED_Green(1);
+			RTC_delayMS(200);
+			LED_Green(0);
+			RTC_delayMS(200);
+		}
+		} else {
+		// Flash red LED to indicate Mini mode
+		for (int i = 0; i < 3; i++) {
+			LED_Red(1);
+			RTC_delayMS(200);
+			LED_Red(0);
+			RTC_delayMS(200);
+		}
+	}
+}
 
 int main(void)
 {
@@ -59,6 +118,10 @@ int main(void)
 	LED_init();
 	SwitchInit();
 	Charger_init();
+	
+	// Read configuration from EEPROM
+	read_config_from_eeprom();
+	
 	// Bell_Init(); // This is now handled in LowVoltKill_init() as needed
 	LowVoltKill_init();
 	
@@ -109,17 +172,12 @@ int main(void)
 					holdTime = (65535 - buttonHoldStartTime) + currentTick + 1;
 				}
 				
-				// If held for threshold time, show confirmation blinks
+				// If held for threshold time, toggle configuration
 				if (holdTime >= BUTTON_HOLD_THRESHOLD) {
-					// Signal activation with quick flashes
-					for (int i = 0; i < 3; i++) {
-						LED_Red(1);
-						RTC_delayMS(100);
-						LED_Red(0);
-						RTC_delayMS(100);
-					}
+					// Toggle configuration mode
+					toggle_config_mode();
 					
-					// After flashing, reset hold time to prevent repeated flashing
+					// After toggling, reset hold time to prevent repeated toggling
 					buttonHoldStartTime = currentTick;
 				}
 			}

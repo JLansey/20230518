@@ -19,6 +19,9 @@
 #include "Led.h"
 #include "Config.h"
 
+// External reference to the configuration mode variable from main.c
+extern uint8_t eeprom_config_mode;
+
 uint16_t LowVoltDetectCount;
 uint8_t LowVoltDetected;
 uint16_t LowVoltkillTimer_mS;
@@ -157,59 +160,30 @@ void LowVoltKill_update(void)
 			//Ring Bell for end of cycle or do mini honk extension
 			case LOW_VOLT_STATE_CHECK_BELL:
 			{
-				#if CONFIG_MODE == CONFIG_MODE_MINIBELL
-				// Original bell behavior
-				if(Bell_Update(BellState))
+				// Use runtime conditional instead of preprocessor directive
+				if(eeprom_config_mode == CONFIG_MODE_MINIBELL)
 				{
-					if(SwitchHornGetStatus())
+					// Original bell behavior
+					if(Bell_Update(BellState))
 					{
-						LowVoltkillTimer_mS = LOW_VOLT_TIME_MAX_HORN_ON_TIME;
-						BellDebounceTimer_mS = BELL_DEBOUNCE_T;
-						BellState = BELL;
-						LED_Green(1);
+						if(SwitchHornGetStatus())
+						{
+							LowVoltkillTimer_mS = LOW_VOLT_TIME_MAX_HORN_ON_TIME;
+							BellDebounceTimer_mS = BELL_DEBOUNCE_T;
+							BellState = BELL;
+							LED_Green(1);
 
-						LowVoltState = LOW_VOLT_STATE_CHECK_HORN1;
-					}
-				
-					else if(LowVoltkillTimer_mS == 0 && LowVoltDetected)
-					{
-						Bell_Init();
-						LED_Green(0);
-
-						LowVoltkillTimer_mS = LOW_VOLT_LOW_BATT_BEEP;
-						LowVoltState = LOW_VOLT_STATE_END_BEEP;
-					}
-				}
-				else
-				{
-					LowVoltkillTimer_mS = LOW_VOLT_TIME_WAIT_LOW_BATT_BEEP;
-					LowVoltState = LOW_VOLT_STATE_CHECK_HORN0;
-				}
-				#else
-				// Mini mode - short honk extension instead of bell
-				if(MiniHonkTimer_mS == 0)
-				{
-					// Do a short honk extension
-					Horn_Enable(HORN_ON);
-					MiniHonkTimer_mS = MINI_HONK_EXTENSION_TIME;
+							LowVoltState = LOW_VOLT_STATE_CHECK_HORN1;
+						}
 					
-					if(SwitchHornGetStatus())
-					{
-						LowVoltkillTimer_mS = LOW_VOLT_TIME_MAX_HORN_ON_TIME;
-						BellDebounceTimer_mS = BELL_DEBOUNCE_T;
-						LED_Green(1);
+						else if(LowVoltkillTimer_mS == 0 && LowVoltDetected)
+						{
+							Bell_Init();
+							LED_Green(0);
 
-						LowVoltState = LOW_VOLT_STATE_CHECK_HORN1;
-					}
-					else if(LowVoltkillTimer_mS == 0 && LowVoltDetected)
-					{
-						LED_Green(0);
-						LowVoltkillTimer_mS = LOW_VOLT_LOW_BATT_BEEP;
-						
-						// For both modes, we properly initialize the low battery bell
-						Horn_Enable(BELL_LOWVOLT);
-						
-						LowVoltState = LOW_VOLT_STATE_END_BEEP;
+							LowVoltkillTimer_mS = LOW_VOLT_LOW_BATT_BEEP;
+							LowVoltState = LOW_VOLT_STATE_END_BEEP;
+						}
 					}
 					else
 					{
@@ -217,7 +191,40 @@ void LowVoltKill_update(void)
 						LowVoltState = LOW_VOLT_STATE_CHECK_HORN0;
 					}
 				}
-				#endif
+				else
+				{
+					// Mini mode - short honk extension instead of bell
+					if(MiniHonkTimer_mS == 0)
+					{
+						// Do a short honk extension
+						Horn_Enable(HORN_ON);
+						MiniHonkTimer_mS = MINI_HONK_EXTENSION_TIME;
+						
+						if(SwitchHornGetStatus())
+						{
+							LowVoltkillTimer_mS = LOW_VOLT_TIME_MAX_HORN_ON_TIME;
+							BellDebounceTimer_mS = BELL_DEBOUNCE_T;
+							LED_Green(1);
+
+							LowVoltState = LOW_VOLT_STATE_CHECK_HORN1;
+						}
+						else if(LowVoltkillTimer_mS == 0 && LowVoltDetected)
+						{
+							LED_Green(0);
+							LowVoltkillTimer_mS = LOW_VOLT_LOW_BATT_BEEP;
+							
+							// For both modes, we properly initialize the low battery bell
+							Horn_Enable(BELL_LOWVOLT);
+							
+							LowVoltState = LOW_VOLT_STATE_END_BEEP;
+						}
+						else
+						{
+							LowVoltkillTimer_mS = LOW_VOLT_TIME_WAIT_LOW_BATT_BEEP;
+							LowVoltState = LOW_VOLT_STATE_CHECK_HORN0;
+						}
+					}
+				}
 
 				break;
 			}
@@ -297,10 +304,12 @@ void LowVoltKill_update(void)
 					LowVoltkillTimer_mS = LOW_VOLT_TIME_WAIT_LOW_BATT_BEEP;
 					LowVoltState = LOW_VOLT_STATE_CHECK_BELL;
 					
-					#if CONFIG_MODE == CONFIG_MODE_MINIBELL
-					BellState = BELL;
-					Horn_Enable(BellState);
-					#endif
+					// Use runtime conditional instead of preprocessor directive
+					if(eeprom_config_mode == CONFIG_MODE_MINIBELL)
+					{
+						BellState = BELL;
+						Horn_Enable(BellState);
+					}
 				}
 				break;
 			}
