@@ -21,6 +21,6 @@
 // Configuration Mode - keeping the same value for backward compatibility with preprocessor directives
 // This will be updated during runtime from the main.c file
 // Default configuration: 0 = MiniBell, 1 = Mini
-#define CONFIG_MODE CONFIG_MODE_MINIBELL
+#define CONFIG_MODE CONFIG_MODE_MINI
 
 #endif /* CONFIG_H */

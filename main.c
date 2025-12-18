@@ -51,7 +51,7 @@ FUSES = {
 uint8_t LowSpeed;
 
 // Global config_mode variable (this will be used by code added to LowVoltKill.c)
-uint8_t eeprom_config_mode = CONFIG_MODE_MINIBELL;
+uint8_t eeprom_config_mode = CONFIG_MODE;
 
 // Variables for button hold feature
 uint16_t buttonHoldStartTime = 0;      // When we started holding the button
@@ -69,7 +69,7 @@ static void read_config_from_eeprom(void)
 		eeprom_config_mode = stored_mode;
 		} else {
 		// Otherwise use the default mode and save it
-		eeprom_config_mode = CONFIG_MODE_MINIBELL;
+		eeprom_config_mode = CONFIG_MODE;
 		// Write signature byte
 		eeprom_write_byte((uint8_t*)CONFIG_EEPROM_ADDR, CONFIG_EEPROM_SIG);
 		// Write configuration mode
